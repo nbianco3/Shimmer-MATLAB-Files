@@ -21,7 +21,6 @@ if (shimmer1.connect)
     shimmer1.setaccelrate(5);           % 100 Hz
     shimmer1.setmagrate(6);             % 75 Hz
     shimmer1.setbaudrate(10);           % 921600 kB/s (max)
-    shimmer1.setpressureresolution(3)
     disp('WARNING: Sensor ranges must match calibrated ranges')
     disp('Press <enter> to continue...')
     pause
@@ -72,7 +71,7 @@ if (shimmer1.connect)
                 set(0,'CurrentFigure',h.figure1);
                 
                 % Plot accelerometer data
-                subplot(2,3,1)
+                subplot(2,2,1)
                 plot(accelDataShimmer1);                                                             
                 axis([0 numPlotSamples -20 20]);
                 ylabel('Acceleration (m/s^2)')
@@ -80,7 +79,7 @@ if (shimmer1.connect)
                 legend(char(signalName{accelIndex(1)}),char(signalName{accelIndex(2)}),char(signalName{accelIndex(3)}))     
                 
                 % Plot gyroscope data
-                subplot(2,3,2)
+                subplot(2,2,2)
                 plot(gyroDataShimmer1);                                                             
                 axis([0 numPlotSamples -500 500]);
                 ylabel('Angular Velocity (deg/s)')
@@ -88,7 +87,7 @@ if (shimmer1.connect)
                 legend(char(signalName{gyroIndex(1)}),char(signalName{gyroIndex(2)}),char(signalName{gyroIndex(3)})) 
                 
                 % Plot magnetometer data
-                subplot(2,3,3)
+                subplot(2,2,3)
                 plot(magDataShimmer1);                                                              
                 axis([0 numPlotSamples -2 2]);
                 ylabel('Magnetic Flux Density (Ga)')
@@ -96,7 +95,7 @@ if (shimmer1.connect)
                 legend(char(signalName{magIndex(1)}),char(signalName{magIndex(2)}),char(signalName{magIndex(3)})) 
                 
                 % Plot ExG data
-                subplot(2,3,4)
+                subplot(2,2,4)
                 plot((emgDataShimmer1(:,1)-mean(emgDataShimmer1(:,1)))/(0.5*max(emgDataShimmer1(:,1))),'b-')
                 hold on
                 plot(emgFiltDataShimmer1(:,1)/max(emgFiltDataShimmer1(:,1)),'k-','LineWidth',1.5);                                                             
@@ -106,9 +105,6 @@ if (shimmer1.connect)
                 title([sprintf('Samp Rate: %4.1f',1000) ' Hz'])
                 %legend(char(signalName{emgIndex(1)}),char(signalName{emgIndex(2)})) 
                 hold off
-                
-                subplot(2,3,5)
-                plot(pressDataShimmer1)
                 
                 figtitle(['Shimmer 1 Data - ' sprintf('Packets Received: %3.2f',packetsReceivedShimmer1) '%']);  
             end
