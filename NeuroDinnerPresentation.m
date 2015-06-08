@@ -3,6 +3,8 @@ function NeuroDinnerPresentation(comPort,captureDuration)
 numPlotSamples = 500;
 buffer = 0.1;
 
+% change yo
+
 shimmer1 = ShimmerHandleClass(comPort);
 macs = SetEnabledSensorsMacrosClass;
 
