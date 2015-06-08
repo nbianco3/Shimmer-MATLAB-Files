@@ -1,8 +1,7 @@
 function NeuroDinnerPresentation(comPort,captureDuration)
 
-numPlotSamples = 500;
-buffer = 0.1;
-
+numPlotSamples = 500;   % samples
+buffer = 0.2;           % seconds
 shimmer1 = ShimmerHandleClass(comPort);
 macs = SetEnabledSensorsMacrosClass;
 
@@ -11,7 +10,7 @@ if (shimmer1.connect)
     % Define settings
     shimmer1.setinternalboard('EMG');
     shimmer1.disableallsensors;
-    shimmer1.setenabledsensors(macs.LNACCEL,1,macs.GYRO,1,macs.MAG,1,macs.EMG24BIT,1,macs.PRESSURE,1);
+    shimmer1.setenabledsensors(macs.LNACCEL,1,macs.GYRO,1,macs.MAG,1,macs.EMG24BIT,1);
     shimmer1.setaccelrange(0);          % +/- 2.0 g
     shimmer1.setgyrorange(1);           % +/- 500 deg/s  
     shimmer1.setmagrange(1);            % +/- 1.0 Ga
@@ -57,7 +56,6 @@ if (shimmer1.connect)
                 magIndex(3) = find(ismember(signalName, 'Magnetometer Z'));
                 emgIndex(1) = find(ismember(signalName, 'EMG CH1'));
                 emgIndex(2) = find(ismember(signalName, 'EMG CH2'));
-                pressIndex = find(ismember(signalName, 'Pressure'));
                 
                 timeDataShimmer1 = calDataShimmer1(:,timeIndex)/1000; % seconds
                 packetsReceivedShimmer1 = shimmer1.getpercentageofpacketsreceived(timeDataShimmer1);
@@ -67,13 +65,13 @@ if (shimmer1.connect)
                 emgDataShimmer1 = [calDataShimmer1(:,emgIndex(1)), calDataShimmer1(:,emgIndex(2))];
                 emgSampleTime = linspace(0,numPlotSamples/1000,numPlotSamples)';
                 emgFiltDataShimmer1 = [processEMG(emgDataShimmer1(:,1),emgSampleTime,[10 400],6), processEMG(emgDataShimmer1(:,1),emgSampleTime,[10 400],6)];
-                pressDataShimmer1 = calDataShimmer1(:,pressIndex);
                 set(0,'CurrentFigure',h.figure1);
                 
                 % Plot accelerometer data
                 subplot(2,2,1)
                 plot(accelDataShimmer1);                                                             
-                axis([0 numPlotSamples -20 20]);
+                axis([0 numPlotSamples -20 40]);
+                set(gca,'YTick',[-20:5:20])
                 ylabel('Acceleration (m/s^2)')
                 title([sprintf('Samp Rate: %4.1f',100) ' Hz'])
                 legend(char(signalName{accelIndex(1)}),char(signalName{accelIndex(2)}),char(signalName{accelIndex(3)}))     
@@ -81,7 +79,8 @@ if (shimmer1.connect)
                 % Plot gyroscope data
                 subplot(2,2,2)
                 plot(gyroDataShimmer1);                                                             
-                axis([0 numPlotSamples -500 500]);
+                axis([0 numPlotSamples -500 1000]);
+                set(gca,'YTick',[-500:250:500])
                 ylabel('Angular Velocity (deg/s)')
                 title([sprintf('Samp Rate: %4.1f',51.2) ' Hz'])
                 legend(char(signalName{gyroIndex(1)}),char(signalName{gyroIndex(2)}),char(signalName{gyroIndex(3)})) 
@@ -89,7 +88,8 @@ if (shimmer1.connect)
                 % Plot magnetometer data
                 subplot(2,2,3)
                 plot(magDataShimmer1);                                                              
-                axis([0 numPlotSamples -2 2]);
+                axis([0 numPlotSamples -2 3.5]);
+                set(gca,'YTick',[-2:0.5:2])
                 ylabel('Magnetic Flux Density (Ga)')
                 title([sprintf('Samp Rate: %4.1f',75) ' Hz'])
                 legend(char(signalName{magIndex(1)}),char(signalName{magIndex(2)}),char(signalName{magIndex(3)})) 
@@ -103,8 +103,7 @@ if (shimmer1.connect)
                 set(gca,'YTick',[-1 0 1])
                 ylabel('Muscle Excitation')
                 title([sprintf('Samp Rate: %4.1f',1000) ' Hz'])
-                %legend(char(signalName{emgIndex(1)}),char(signalName{emgIndex(2)})) 
-                hold off
+                hold off             
                 
                 figtitle(['Shimmer 1 Data - ' sprintf('Packets Received: %3.2f',packetsReceivedShimmer1) '%']);  
             end
