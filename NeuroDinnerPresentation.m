@@ -27,7 +27,6 @@ if (shimmer1.connect)
     if (shimmer1.start)
         
         calDataShimmer1 = [];
-        datalength = [];
         h.figure1=figure('Name','Shimmer 1','units','normalized','position',[0 0 1 1]);
         elapsedTime = 0;
         tic;
@@ -39,8 +38,6 @@ if (shimmer1.connect)
             % Read and plot data for shimmer1
             [calData,signalName,signalFormat,signalUnit]=shimmer1.getdata('c');
             calDataShimmer1 = [calDataShimmer1; calData];    % Read the calibrated data for shimmer1 and add to previous data
-            datalength = [datalength; calData];
-            size(datalength)
             
             if (length(calDataShimmer1)>numPlotSamples)
                 calDataShimmer1 = calDataShimmer1((length(calDataShimmer1)-numPlotSamples):end,:);
