@@ -1,8 +1,9 @@
-function TestShimmerConnectivity
+function TestShimmerConnectivity2
 
 captureDuration = 1000;
-numPlotSamples = 2000;   % samples
-buffer = 1;              % seconds
+numPlotSamples = 500;   % samples
+buffer = 1;             % seconds
+Fs = 512;               % Hz
 shimmer1 = ShimmerHandleClass('5');
 shimmer2 = ShimmerHandleClass('7');
 shimmer3 = ShimmerHandleClass('9');
@@ -21,9 +22,7 @@ if (shimmer1.connect && shimmer2.connect && shimmer3.connect && shimmer4.connect
     shimmer1.setaccelrange(0);          % +/- 2.0 g
     shimmer1.setgyrorange(1);           % +/- 500 deg/s  
     shimmer1.setmagrange(1);            % +/- 1.0 Ga
-    shimmer1.setgyrorate(45);           % 173.91 Hz (8-bit input --> 255 to 0)
-    shimmer1.setaccelrate(5);           % 100 Hz
-    shimmer1.setmagrate(6);             % 75 Hz
+    shimmer1.setsamplingrate(Fs);
     shimmer1.setbaudrate(10);           % 921600 kB/s (max)
     
     % Shimmer 2 (BTID 3A45 - Shimmer3 unit)
@@ -33,11 +32,7 @@ if (shimmer1.connect && shimmer2.connect && shimmer3.connect && shimmer4.connect
     shimmer2.setaccelrange(0);          % +/- 2.0 g
     shimmer2.setgyrorange(1);           % +/- 500 deg/s  
     shimmer2.setmagrange(1);            % +/- 1.0 Ga
-    shimmer2.setgyrorate(45);           % 173.91 Hz (8-bit input --> 255 to 0)
-    shimmer2.setexgrate(3,1);           % 1000 Hz (4 = 2000 Hz)
-    shimmer2.setexgrate(3,2);
-    shimmer2.setaccelrate(5);           % 100 Hz
-    shimmer2.setmagrate(6);             % 75 Hz
+    shimmer2.setsamplingrate(Fs);
     shimmer2.setbaudrate(10);           % 921600 kB/s (max)
     
     % Shimmer 3 (BTID 399C - Shimmer3 unit)
@@ -47,11 +42,7 @@ if (shimmer1.connect && shimmer2.connect && shimmer3.connect && shimmer4.connect
     shimmer3.setaccelrange(0);          % +/- 2.0 g
     shimmer3.setgyrorange(1);           % +/- 500 deg/s  
     shimmer3.setmagrange(1);            % +/- 1.0 Ga
-    shimmer3.setgyrorate(45);           % 173.91 Hz (8-bit input --> 255 to 0)
-    shimmer3.setexgrate(3,1);           % 1000 Hz (4 = 2000 Hz)
-    shimmer3.setexgrate(3,2);
-    shimmer3.setaccelrate(5);           % 100 Hz
-    shimmer3.setmagrate(6);             % 75 Hz
+    shimmer3.setsamplingrate(Fs);
     shimmer3.setbaudrate(10);           % 921600 kB/s (max)
     
     % Shimmer 4 (BTID 3A1E - Shimmer3 unit)
@@ -61,11 +52,7 @@ if (shimmer1.connect && shimmer2.connect && shimmer3.connect && shimmer4.connect
     shimmer4.setaccelrange(0);          % +/- 2.0 g
     shimmer4.setgyrorange(1);           % +/- 500 deg/s  
     shimmer4.setmagrange(1);            % +/- 1.0 Ga
-    shimmer4.setgyrorate(45);           % 173.91 Hz (8-bit input --> 255 to 0)
-    shimmer4.setexgrate(3,1);           % 1000 Hz (4 = 2000 Hz)
-    shimmer4.setexgrate(3,2);
-    shimmer4.setaccelrate(5);           % 100 Hz
-    shimmer4.setmagrate(6);             % 75 Hz
+    shimmer4.setsamplingrate(Fs);
     shimmer4.setbaudrate(10);           % 921600 kB/s (max)
     
     % Shimmer 5 (BTID 39F8 - Shimmer3 unit)
@@ -75,11 +62,7 @@ if (shimmer1.connect && shimmer2.connect && shimmer3.connect && shimmer4.connect
     shimmer5.setaccelrange(0);          % +/- 2.0 g
     shimmer5.setgyrorange(1);           % +/- 500 deg/s  
     shimmer5.setmagrange(1);            % +/- 1.0 Ga
-    shimmer5.setgyrorate(45);           % 173.91 Hz (8-bit input --> 255 to 0)
-    shimmer5.setexgrate(3,1);           % 1000 Hz (4 = 2000 Hz)
-    shimmer5.setexgrate(3,2);
-    shimmer5.setaccelrate(5);           % 100 Hz
-    shimmer5.setmagrate(6);             % 75 Hz
+    shimmer5.setsamplingrate(Fs);
     shimmer5.setbaudrate(10);           % 921600 kB/s (max)
     
     % Shimmer 6 (BTID 2BFD - GSR+ unit)
@@ -90,9 +73,7 @@ if (shimmer1.connect && shimmer2.connect && shimmer3.connect && shimmer4.connect
     shimmer6.setaccelrange(0);          % +/- 2.0 g
     shimmer6.setgyrorange(1);           % +/- 500 deg/s  
     shimmer6.setmagrange(1);            % +/- 1.0 Ga
-    shimmer6.setgyrorate(45);           % 173.91 Hz (8-bit input --> 255 to 0)
-    shimmer6.setaccelrate(5);           % 100 Hz
-    shimmer6.setmagrate(6);             % 75 Hz
+    shimmer6.setsamplingrate(Fs);
     shimmer6.setbaudrate(10);           % 921600 kB/s (max)
     
     % Shimmer 7 (BTID 38F5 - PROTO3 unit)
@@ -116,6 +97,7 @@ if (shimmer1.connect && shimmer2.connect && shimmer3.connect && shimmer4.connect
         calDataShimmer5 = [];
         calDataShimmer6 = [];
         %calDataShimmer7 = [];
+        h.figure1 = figure('Name','Shimmer Connectivity');
         elapsedTime = 0;
         tic;
         
