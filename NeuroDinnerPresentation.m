@@ -1,4 +1,6 @@
-function NeuroDinnerPresentation(comPort,captureDuration)
+function NeuroDinnerPresentation(comPort)
+
+global toggle
 
 numPlotSamples = 500;   % samples
 buffer = 0.2;            % seconds
@@ -14,11 +16,12 @@ if (shimmer1.connect)
     shimmer1.setaccelrange(0);          % +/- 2.0 g
     shimmer1.setgyrorange(1);           % +/- 500 deg/s  
     shimmer1.setmagrange(1);            % +/- 1.0 Ga
-    shimmer1.setgyrorate(155);          % 51.2 Hz (8-bit input --> 255 to 0)
-    shimmer1.setexgrate(3,1);           % 1000 Hz (4 = 2000 Hz)
-    shimmer1.setexgrate(3,2);
-    shimmer1.setaccelrate(5);           % 100 Hz
-    shimmer1.setmagrate(6);             % 75 Hz
+    shimmer1.setsamplingrate(100);
+%     shimmer1.setgyrorate(155);          % 51.2 Hz (8-bit input --> 255 to 0)
+%     shimmer1.setexgrate(3,1);           % 1000 Hz (4 = 2000 Hz)
+%     shimmer1.setexgrate(3,2);
+%     shimmer1.setaccelrate(5);           % 100 Hz
+%     shimmer1.setmagrate(6);             % 75 Hz
     shimmer1.setbaudrate(10);           % 921600 kB/s (max)
     disp('WARNING: Sensor ranges must match calibrated ranges')
     disp('Press <enter> to continue...')
@@ -30,8 +33,14 @@ if (shimmer1.connect)
         h.figure1=figure('Name','Shimmer 1','units','normalized','position',[0 0 1 1]);
         elapsedTime = 0;
         tic;
+     
+        isempty(toggle)
+        if ~toggle || isempty(toggle)
+            toggle
+            disp('Press <Collect Data> to record trial...')
+        end
         
-        while (elapsedTime < captureDuration)
+        while toggle
             
             pause(buffer)
         
@@ -40,10 +49,9 @@ if (shimmer1.connect)
             calDataShimmer1 = [calDataShimmer1; calData];    % Read the calibrated data for shimmer1 and add to previous data
                     
             
-%             if (length(calDataShimmer1)>numPlotSamples)
-%                 calDataShimmer1 = calDataShimmer1((length(calDataShimmer1)-numPlotSamples):end,:);
-%             end
-            
+            if (length(calDataShimmer1)>numPlotSamples)
+                calDataShimmer1 = calDataShimmer1((length(calDataShimmer1)-numPlotSamples):end,:);
+            end
             
             if ~isempty(calDataShimmer1)
                 timeIndex = find(ismember(signalName, 'Time Stamp'));
