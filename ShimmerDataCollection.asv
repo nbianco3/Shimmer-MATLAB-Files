@@ -22,7 +22,7 @@ function varargout = ShimmerDataCollection(varargin)
 
 % Edit the above text to modify the response to help ShimmerDataCollection
 
-% Last Modified by GUIDE v2.5 12-Jun-2015 11:28:38
+% Last Modified by GUIDE v2.5 12-Jun-2015 10:36:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -118,7 +118,6 @@ function connectbutton_Callback(hObject, eventdata, handles)
     baudrate_h = handles.baudratemenu;
     samprate_h = handles.samprate;
     params_h = handles.setparams;
-    elapsedtime_h = handles.elapsedtime;
     
     set(start_h,'Value',0)
     set(stop_h,'Value',0)
@@ -135,20 +134,8 @@ function connectbutton_Callback(hObject, eventdata, handles)
     set(baudrate_h,'Value',1)
     set(samprate_h,'Value',1)
     set(params_h,'Value',0)
-    set(elapsedtime_h,'String',0)
     
-    % Enable sensor parameters if disabled
-    set(emg_h,'Enable','on')
-    set(gsr_h,'Enable','on')
-    set(accelrange_h,'Enable','on')
-    set(gyrorange_h,'Enable','on')
-    set(magrange_h,'Enable','on')
-    set(accelrate_h,'Enable','on')
-    set(gyrorate_h,'Enable','on')
-    set(magrate_h,'Enable','on')
-    set(emgrate_h,'Enable','on')
-    set(baudrate_h,'Enable','on')
-    set(samprate_h,'Enable','on')
+    % Enable parameter 
     
     % Execute data collection
     if strcmp(mode,'All Units')
@@ -357,26 +344,3 @@ function setparams_Callback(hObject, eventdata, handles)
 % hObject    handle to setparams (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-
-function elapsedtime_Callback(hObject, eventdata, handles)
-% hObject    handle to text123 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of text123 as text
-%        str2double(get(hObject,'String')) returns contents of text123 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function text123_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to text123 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end

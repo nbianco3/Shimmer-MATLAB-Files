@@ -7,8 +7,8 @@ pathname = 'C:\Users\Nick\Documents\Parkinson Mobility Study\Shimmer MATLAB File
 
 for i=1:numSensors
     if sensorFlag(i)
-        
-        [sensorNames,signalNames,formatNames,signalUnits,sensorData] = loadshimd([trialname ' - ' sensors{i} '.txt']);
+        sensors{i}
+        [~,signalNames,formatNames,signalUnits,sensorData] = loadshimd([pathname trialname ' - ' sensors{i} '.txt']);
         
         % Remove spaces from
         for j=1:length(signalNames)
@@ -17,16 +17,20 @@ for i=1:numSensors
             signalNames{j} = stringname;
         end
         
-        for j = 1:length(sensorNames)
+        for j = 1:length(signalNames)
             if strcmp(formatNames{j},'RAW')
                 trial.(sensors{i}).RAW.(signalNames{j}).data = sensorData(:,j);
                 trial.(sensors{i}).RAW.(signalNames{j}).units = signalUnits(:,j);
             elseif strcmp(formatNames{j}(1:3),'CAL')
-                if strcmp(signalNames{j},'Timestamp')
+                if strcmp(signalNames{j},'Time Stamp')
                     time = (sensorData(:,j)-sensorData(1,j))/1000;
                     trial.(sensors{i}).CALIBRATED.(signalNames{j}).data = time;
                     trial.(sensors{i}).CALIBRATED.(signalNames{j}).units = 's';
                 else
+                    signalNames{j}
+                    if ~ischar(signalNames{j})
+                        keyboard
+                    end
                     trial.(sensors{i}).CALIBRATED.(signalNames{j}).data = sensorData(:,j);
                     trial.(sensors{i}).CALIBRATED.(signalNames{j}).units = signalUnits(:,j);
                 end

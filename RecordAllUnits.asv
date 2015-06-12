@@ -341,10 +341,12 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
         disp('Release <Stop> button if necessary...')
         waitfor(stop_h,'Value',0)
         disp('Press <Start> to begin recording trial...')
+        get(start_h,'Value')
         waitfor(start_h,'Value',1)
+        get(start_h,'Value')
         
             elapsedTime = 0;
-            set(elapsedtime_h,'String',num2str(elapsedTime))
+            set(elapsedtime_h,'
             if (shimmer1.start && shimmer2.start) % && shimmer3.start && shimmer4.start && shimmer5.start && shimmer6.start) % && shimmer7.start)
                 
                 tic;
@@ -393,6 +395,7 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
                                 signalNamesString = [signalNamesString char(9) char(signalNames(1,i))];
                                 signalFormatsString = [signalFormatsString char(9) char(signalFormats(1,i))];
                                 signalUnitsString = [signalUnitsString char(9) char(signalUnits(1,i))];
+                                firsttime=false;
                             end
                             
                             dlmwrite([pathname trialname ' - ' sensorNames{1,1} '.txt'], sensorNamesString, '%s')
@@ -420,7 +423,8 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
                     end
                     
                     % Read in Shimmer 2 data and header files
-                    [newDataShimmer2,signalNames,signalFormats,signalUnits]=shimmer2.getdata('c');
+                    [newDataShimmer2,signalNames,signalFormats,signalUnits]=shimmer1.getdata('c');
+                    
                     if ~isempty(newDataShimmer2) 
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,2));
@@ -432,10 +436,9 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
                                 signalNamesString = [signalNamesString char(9) char(signalNames(1,i))];
                                 signalFormatsString = [signalFormatsString char(9) char(signalFormats(1,i))];
                                 signalUnitsString = [signalUnitsString char(9) char(signalUnits(1,i))];
+                                firsttime=false;
                             end
-                            
                             dlmwrite([pathname trialname ' - ' sensorNames{1,2} '.txt'], sensorNamesString, '%s')
-                            
                             fid = fopen([pathname trialname ' - ' sensorNames{1,2} '.txt'],'a');
                             fprintf(fid,'%s\n',signalNamesString);
                             fclose(fid);
@@ -512,15 +515,12 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
                     tabledata = [packetsReceivedShimmer1 battShimmer1; packetsReceivedShimmer2 battShimmer2; packetsReceivedShimmer3 battShimmer3; packetsReceivedShimmer4 battShimmer4; packetsReceivedShimmer5 battShimmer5; packetsReceivedShimmer6 battShimmer6; packetsReceivedShimmer7 battShimmer7];
                     set(table1_h,'Data',tabledata)
                     
-                    elapsedTime = elapsedTime + toc;
-                    set(elapsedtime_h,'String',num2str(elapsedTime))
+                    elapsedTime = elapsedTime + toc;                           
                     tic; 
                     
-                    firsttime=false;
                 end
                 
                 elapsedTime = elapsedTime + toc;
-                set(elapsedtime_h,'String',num2str(elapsedTime))
                 
                 % Stop streaming
                 shimmer1.stop;
