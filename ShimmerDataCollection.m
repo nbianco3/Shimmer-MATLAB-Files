@@ -22,7 +22,7 @@ function varargout = ShimmerDataCollection(varargin)
 
 % Edit the above text to modify the response to help ShimmerDataCollection
 
-% Last Modified by GUIDE v2.5 12-Jun-2015 11:28:38
+% Last Modified by GUIDE v2.5 12-Jun-2015 15:28:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -117,8 +117,16 @@ function connectbutton_Callback(hObject, eventdata, handles)
     emgrate_h = handles.emgratemenu;
     baudrate_h = handles.baudratemenu;
     samprate_h = handles.samprate;
+    sampratebool_h = handles.sampratebool;
     params_h = handles.setparams;
     elapsedtime_h = handles.elapsedtime;
+    enable2BD1_h = handles.enable2BD1;
+    enable3A45_h = handles.enable3A45;
+    enable399C_h = handles.enable399C;
+    enable3A1E_h = handles.enable3A1E;
+    enable39F8_h = handles.enable39F8;
+    enable2BFD_h = handles.enable2BFD;
+    enable38F5_h = handles.enable38F5;
     
     set(start_h,'Value',0)
     set(stop_h,'Value',0)
@@ -133,9 +141,17 @@ function connectbutton_Callback(hObject, eventdata, handles)
     set(magrate_h,'Value',1)
     set(emgrate_h,'Value',1)
     set(baudrate_h,'Value',1)
+    set(sampratebool_h,'Value',0)
     set(samprate_h,'Value',1)
     set(params_h,'Value',0)
     set(elapsedtime_h,'String',0)
+    set(enable2BD1_h,'Value',1)
+    set(enable3A45_h,'Value',1)
+    set(enable399C_h,'Value',1)
+    set(enable3A1E_h,'Value',1)
+    set(enable39F8_h,'Value',1)
+    set(enable2BFD_h,'Value',1)
+    set(enable38F5_h,'Value',0)
     
     % Enable sensor parameters if disabled
     set(emg_h,'Enable','on')
@@ -149,6 +165,7 @@ function connectbutton_Callback(hObject, eventdata, handles)
     set(emgrate_h,'Enable','on')
     set(baudrate_h,'Enable','on')
     set(samprate_h,'Enable','on')
+    set(sampratebool_h,'Enable','on')
     
     % Execute data collection
     if strcmp(mode,'All Units')
@@ -380,3 +397,75 @@ function text123_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in sampratebool.
+function sampratebool_Callback(hObject, eventdata, handles)
+% hObject    handle to sampratebool (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of sampratebool
+
+
+% --- Executes on button press in enable2BD1.
+function enable2BD1_Callback(hObject, eventdata, handles)
+% hObject    handle to enable2BD1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of enable2BD1
+
+
+% --- Executes on button press in enable3A45.
+function enable3A45_Callback(hObject, eventdata, handles)
+% hObject    handle to enable3A45 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of enable3A45
+
+
+% --- Executes on button press in enable399C.
+function enable399C_Callback(hObject, eventdata, handles)
+% hObject    handle to enable399C (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of enable399C
+
+
+% --- Executes on button press in enable3A1E.
+function enable3A1E_Callback(hObject, eventdata, handles)
+% hObject    handle to enable3A1E (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of enable3A1E
+
+
+% --- Executes on button press in enable39F8.
+function enable39F8_Callback(hObject, eventdata, handles)
+% hObject    handle to enable39F8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of enable39F8
+
+
+% --- Executes on button press in enable2BFD.
+function enable2BFD_Callback(hObject, eventdata, handles)
+% hObject    handle to enable2BFD (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of enable2BFD
+
+
+% --- Executes on button press in enable38F5.
+function enable38F5_Callback(hObject, eventdata, handles)
+% hObject    handle to enable38F5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of enable38F5

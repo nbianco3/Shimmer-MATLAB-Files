@@ -18,8 +18,16 @@ magrate_h = handles.magratemenu;
 emgrate_h = handles.emgratemenu;
 baudrate_h = handles.baudratemenu;
 samprate_h = handles.samprate;
+sampratebool_h = handles.sampratebool;
 params_h = handles.setparams;
 elapsedtime_h = handles.elapsedtime;
+enable2BD1_h = handles.enable2BD1;
+enable3A45_h = handles.enable3A45;
+enable399C_h = handles.enable399C;
+enable3A1E_h = handles.enable3A1E;
+enable39F8_h = handles.enable39F8;
+enable2BFD_h = handles.enable2BFD;
+enable38F5_h = handles.enable38F5;
 
 sensorFlag = [0 0 0 0 0 0 0];
 
@@ -28,14 +36,17 @@ pathname = 'C:\Users\Nick\Documents\Parkinson Mobility Study\Shimmer MATLAB File
 disp('All')
 
 buffer = 1; % seconds
+
 shimmer1 = ShimmerHandleClass('5');
 shimmer2 = ShimmerHandleClass('7');
-% shimmer3 = ShimmerHandleClass('9');
-% shimmer4 = ShimmerHandleClass('11');
-% shimmer5 = ShimmerHandleClass('13');
-% shimmer6 = ShimmerHandleClass('15');
-%shimmer7 = ShimmerHandleClass('17');
+shimmer3 = ShimmerHandleClass('9');
+shimmer4 = ShimmerHandleClass('11');
+shimmer5 = ShimmerHandleClass('13');
+shimmer6 = ShimmerHandleClass('15');
+shimmer7 = ShimmerHandleClass('17');
+
 macros = SetEnabledSensorsMacrosClass;
+
 sensorNames = {'Unit2BD1','Unit3A45','Unit399C','Unit3A1E','Unit39F8','Unit2BFD','Unit38F5'};
 
 %% Set sensor parameters
@@ -63,7 +74,7 @@ set(gsr_h,'Enable','off')
 % Wide Range Acclerometer range (±g)
 contents = cellstr(get(accelrange_h,'String'));
 switch contents{get(accelrange_h,'Value')}
-    case '2 (default)' 
+    case '2 (default)'
         accel_range = 0;
     case '4'
         accel_range = 1;
@@ -220,118 +231,196 @@ set(baudrate_h,'Enable','off')
 Fs = str2double(get(samprate_h,'String'));
 set(samprate_h,'Enable','off')
 
-if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.connect && shimmer5.connect && shimmer6.connect) % && shimmer7.connect)
+%% Connect Shimmers
+shimmersSelected = zeros(1,7);
+if get(enable2BD1_h,'Value'), shimmersSelected(1)=true; end
+if get(enable3A45_h,'Value'), shimmersSelected(2)=true; end
+if get(enable399C_h,'Value'), shimmersSelected(3)=true; end
+if get(enable3A1E_h,'Value'), shimmersSelected(4)=true; end
+if get(enable39F8_h,'Value'), shimmersSelected(5)=true; end
+if get(enable2BFD_h,'Value'), shimmersSelected(6)=true; end
+if get(enable38F5_h,'Value'), shimmersSelected(7)=true; end
+
+connectCount=0;
+if (get(enable2BD1_h,'Value')) && (shimmersSelected(1)), if shimmer1.connect, connectCount=connectCount+1; end; end;
+if (get(enable3A45_h,'Value')) && (shimmersSelected(2)), if shimmer2.connect, connectCount=connectCount+1; end; end;
+if (get(enable399C_h,'Value')) && (shimmersSelected(3)), if shimmer3.connect, connectCount=connectCount+1; end; end;
+if (get(enable3A1E_h,'Value')) && (shimmersSelected(4)), if shimmer4.connect, connectCount=connectCount+1; end; end;
+if (get(enable39F8_h,'Value')) && (shimmersSelected(5)), if shimmer5.connect, connectCount=connectCount+1; end; end;
+if (get(enable2BFD_h,'Value')) && (shimmersSelected(6)), if shimmer6.connect, connectCount=connectCount+1; end; end;
+if (get(enable38F5_h,'Value')) && (shimmersSelected(7)), if shimmer7.connect, connectCount=connectCount+1; end; end;
+
+if length(find(shimmersSelected))==connectCount
     
     % Shimmer 1 (BTID 2BD1 - IMU unit)
-    shimmer1.setbaudrate(baud_rate);
-    shimmer1.setinternalboard('None');
-    shimmer1.disableallsensors;
-    shimmer1.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-    shimmer1.setaccelrange(accel_range);
-    shimmer1.setgyrorange(gyro_range);
-    shimmer1.setmagrange(mag_range);
-    shimmer1.setaccelrate(accel_rate);
-    shimmer1.setgyrorate(gyro_rate);
-    shimmer1.setmagrate(mag_rate);
-    
-    % Shimmer 2 (BTID 3A45 - Shimmer3 unit)
-    shimmer2.setbaudrate(baud_rate);
-    shimmer2.setinternalboard('None');
-    shimmer2.disableallsensors;
-    shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-    shimmer2.setaccelrange(accel_range);
-    shimmer2.setgyrorange(gyro_range);
-    shimmer2.setmagrange(mag_range);
-    shimmer2.setaccelrate(accel_rate);
-    shimmer2.setgyrorate(gyro_rate);
-    shimmer2.setmagrate(mag_rate);
-%     
-%     % Shimmer 3 (BTID 399C - Shimmer3 unit)
-%     shimmer3.setbaudrate(baud_rate);
-%     shimmer3.setinternalboard('None');
-%     shimmer3.disableallsensors;
-%     shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-%     shimmer3.setaccelrange(accel_range);
-%     shimmer3.setgyrorange(gyro_range);
-%     shimmer3.setmagrange(mag_range);
-%     shimmer3.setaccelrate(accel_rate);
-%     shimmer3.setgyrorate(gyro_rate);
-%     shimmer3.setmagrate(mag_rate);
-%     
-%     % Shimmer 4 (BTID 3A1E - Shimmer3 unit)
-%     shimmer4.setbaudrate(baud_rate);
-%     shimmer4.setinternalboard('None');
-%     shimmer4.disableallsensors;
-%     shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-%     shimmer4.setaccelrange(accel_range);
-%     shimmer4.setgyrorange(gyro_range);
-%     shimmer4.setmagrange(mag_range);
-%     shimmer4.setaccelrate(accel_rate);
-%     shimmer4.setgyrorate(gyro_rate);
-%     shimmer4.setmagrate(mag_rate);
-%     
-%     % Shimmer 5 (BTID 39F8 - Shimmer3 unit)
-%     shimmer5.setbaudrate(baud_rate);
-%     shimmer5.setinternalboard('None');
-%     shimmer5.disableallsensors;
-%     shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-%     shimmer5.setaccelrange(accel_range);
-%     shimmer5.setgyrorange(gyro_range);
-%     shimmer5.setmagrange(mag_range);
-%     shimmer5.setaccelrate(accel_rate);
-%     shimmer5.setgyrorate(gyro_rate);
-%     shimmer5.setmagrate(mag_rate);
-%     
-%     % Shimmer 6 (BTID 2BFD - GSR+ unit)
-%     shimmer6.setbaudrate(baud_rate);
-%     shimmer6.setinternalboard('None');
-%     shimmer6.disableallsensors;
-%     shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.INTA13,1,macros.BATT,1);
-%     shimmer6.setinternalexppower(1);    % Enable internal expansion power
-%     shimmer6.setaccelrange(accel_range);
-%     shimmer6.setgyrorange(gyro_range);
-%     shimmer6.setmagrange(mag_range);
-%     shimmer6.setaccelrate(accel_rate);
-%     shimmer6.setgyrorate(gyro_rate);
-%     shimmer6.setmagrate(mag_rate);
-    
-    % Shimmer 7 (BTID 38F5 - PROTO3 unit)
-    %     shimmer7.setbaudrate(baud_rate);
-    %     shimmer7.setinternalboard('None');
-    %     shimmer7.disableallsensors;
-    %     shimmer7.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-    %     shimmer7.setaccelrange(accel_range);
-    %     shimmer7.setgyrorange(gyro_range);
-    %     shimmer7.setmagrange(mag_range);
-    %     shimmer7.setaccelrate(accel_rate);
-    %     shimmer7.setgyrorate(gyro_rate);
-    %     shimmer7.setmagrate(mag_rate);
-    
-    % Enable EMG daughterboard and set sampling rates
-    if exgFlag == true
-        shimmer2.setenabledsensors(macros.EMG24BIT,1);
-        shimmer2.setinternalboard('EMG');
-        shimmer2.setexgrate(exg_rate,1);
-        shimmer2.setexgrate(exg_rate,2);
-%         shimmer3.setenabledsensors(macros.EMG24BIT,1);
-%         shimmer3.setinternalboard('EMG');
-%         shimmer3.setexgrate(exg_rate,1);
-%         shimmer3.setexgrate(exg_rate,2);
-%         shimmer4.setenabledsensors(macros.EMG24BIT,1);
-%         shimmer4.setinternalboard('EMG');
-%         shimmer4.setexgrate(exg_rate,1);
-%         shimmer4.setexgrate(exg_rate,2);
-%         shimmer5.setenabledsensors(macros.EMG24BIT,1);
-%         shimmer5.setinternalboard('EMG');
-%         shimmer5.setexgrate(exg_rate,1);
-%         shimmer5.setexgrate(exg_rate,2);
+    if shimmersSelected(1)
+        shimmer1.setbaudrate(baud_rate);
+        shimmer1.setinternalboard('None');
+        shimmer1.disableallsensors;
+        shimmer1.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+        shimmer1.setaccelrange(accel_range);
+        shimmer1.setgyrorange(gyro_range);
+        shimmer1.setmagrange(mag_range);
+        switch get(sampratebool_h,'Value')
+            case 0
+                shimmer1.setaccelrate(accel_rate);
+                shimmer1.setgyrorate(gyro_rate);
+                shimmer1.setmagrate(mag_rate);
+            case 1
+                shimmer1.setsamplingrate(Fs);
+        end
     end
     
-    % Enable GSR daughterboard and internal expansion power
-    if gsrFlag == true
-%         shimmer6.setenabledsensors(macros.INTA13,1);
-%         shimmer6.setinternalexppower(1);
-    end 
+    % Shimmer 2 (BTID 3A45 - Shimmer3 unit)
+    if shimmersSelected(2)
+        shimmer2.setbaudrate(baud_rate);
+        shimmer2.setinternalboard('None');
+        shimmer2.disableallsensors;
+        shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+        shimmer2.setaccelrange(accel_range);
+        shimmer2.setgyrorange(gyro_range);
+        shimmer2.setmagrange(mag_range);
+        if exgFlag == true
+            shimmer2.setenabledsensors(macros.EMG24BIT,1);
+            shimmer2.setinternalboard('EMG');
+            if ~get(sampratebool_h,'Value')
+                shimmer2.setexgrate(exg_rate,1);
+                shimmer2.setexgrate(exg_rate,2);
+            end
+        end
+        switch get(sampratebool_h,'Value')
+            case 0
+                shimmer2.setaccelrate(accel_rate);
+                shimmer2.setgyrorate(gyro_rate);
+                shimmer2.setmagrate(mag_rate);
+            case 1
+                shimmer2.setsamplingrate(Fs);
+        end
+    end
+    
+    % Shimmer 3 (BTID 399C - Shimmer3 unit)
+    if shimmersSelected(3)
+        shimmer3.setbaudrate(baud_rate);
+        shimmer3.setinternalboard('None');
+        shimmer3.disableallsensors;
+        shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+        shimmer3.setaccelrange(accel_range);
+        shimmer3.setgyrorange(gyro_range);
+        shimmer3.setmagrange(mag_range);
+        if exgFlag == true
+            shimmer3.setenabledsensors(macros.EMG24BIT,1);
+            shimmer3.setinternalboard('EMG');
+            if ~get(sampratebool_h,'Value')
+                shimmer3.setexgrate(exg_rate,1);
+                shimmer3.setexgrate(exg_rate,2);
+            end
+        end
+        switch get(sampratebool_h,'Value')
+            case 0
+                shimmer3.setaccelrate(accel_rate);
+                shimmer3.setgyrorate(gyro_rate);
+                shimmer3.setmagrate(mag_rate);
+            case 1
+                shimmer3.setsamplingrate(Fs);
+        end
+    end
+    
+    % Shimmer 4 (BTID 3A1E - Shimmer3 unit)
+    if shimmersSelected(4)
+        shimmer4.setbaudrate(baud_rate);
+        shimmer4.setinternalboard('None');
+        shimmer4.disableallsensors;
+        shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+        shimmer4.setaccelrange(accel_range);
+        shimmer4.setgyrorange(gyro_range);
+        shimmer4.setmagrange(mag_range);
+        if exgFlag == true
+            shimmer4.setenabledsensors(macros.EMG24BIT,1);
+            shimmer4.setinternalboard('EMG');
+            if ~get(sampratebool_h,'Value')
+                shimmer4.setexgrate(exg_rate,1);
+                shimmer4.setexgrate(exg_rate,2);
+            end
+        end
+        switch get(sampratebool_h,'Value')
+            case 0
+                shimmer4.setaccelrate(accel_rate);
+                shimmer4.setgyrorate(gyro_rate);
+                shimmer4.setmagrate(mag_rate);
+            case 1
+                shimmer4.setsamplingrate(Fs);
+        end
+    end
+    
+    % Shimmer 5 (BTID 39F8 - Shimmer3 unit)
+    if shimmersSelected(5)
+        shimmer5.setbaudrate(baud_rate);
+        shimmer5.setinternalboard('None');
+        shimmer5.disableallsensors;
+        shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+        shimmer5.setaccelrange(accel_range);
+        shimmer5.setgyrorange(gyro_range);
+        shimmer5.setmagrange(mag_range);
+        if exgFlag == true
+            shimmer5.setenabledsensors(macros.EMG24BIT,1);
+            shimmer5.setinternalboard('EMG');
+            if ~get(sampratebool_h,'Value')
+                shimmer5.setexgrate(exg_rate,1);
+                shimmer5.setexgrate(exg_rate,2);
+            end
+        end
+        switch get(sampratebool_h,'Value')
+            case 0
+                shimmer5.setaccelrate(accel_rate);
+                shimmer5.setgyrorate(gyro_rate);
+                shimmer5.setmagrate(mag_rate);
+            case 1
+                shimmer5.setsamplingrate(Fs);
+        end
+    end
+    
+    % Shimmer 6 (BTID 2BFD - GSR+ unit)
+    if shimmersSelected(6)
+        shimmer6.setbaudrate(baud_rate);
+        shimmer6.setinternalboard('None');
+        shimmer6.disableallsensors;
+        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.INTA13,1,macros.BATT,1);
+        shimmer6.setinternalexppower(1);    % Enable internal expansion power
+        shimmer6.setaccelrange(accel_range);
+        shimmer6.setgyrorange(gyro_range);
+        shimmer6.setmagrange(mag_range);
+        if gsrFlag == true
+            shimmer6.setenabledsensors(macros.INTA13,1);
+            shimmer6.setinternalexppower(1);
+        end
+        switch get(sampratebool_h,'Value')
+            case 0
+                shimmer6.setaccelrate(accel_rate);
+                shimmer6.setgyrorate(gyro_rate);
+                shimmer6.setmagrate(mag_rate);
+            case 1
+                shimmer6.setsamplingrate(Fs);
+        end
+    end
+    
+    %  Shimmer 7 (BTID 38F5 - PROTO3 unit)
+    if shimmersSelected(7)
+        shimmer7.setbaudrate(baud_rate);
+        shimmer7.setinternalboard('None');
+        shimmer7.disableallsensors;
+        shimmer7.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+        shimmer7.setaccelrange(accel_range);
+        shimmer7.setgyrorange(gyro_range);
+        shimmer7.setmagrange(mag_range);
+        switch get(sampratebool_h,'Value')
+            case 0
+                shimmer7.setaccelrate(accel_rate);
+                shimmer7.setgyrorate(gyro_rate);
+                shimmer7.setmagrate(mag_rate);
+            case 1
+                shimmer7.setsamplingrate(Fs);
+        end
+    end
     
     disp('Release <Disconnect> button if necessary...')
     waitfor(disconnect_h,'Value',0)
@@ -343,46 +432,56 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
         disp('Press <Start> to begin recording trial...')
         waitfor(start_h,'Value',1)
         
+        startCount=0;
+        if (shimmersSelected(1)), if shimmer1.start, startCount=startCount+1; end; end;
+        if (shimmersSelected(2)), if shimmer2.start, startCount=startCount+1; end; end;
+        if (shimmersSelected(3)), if shimmer3.start, startCount=startCount+1; end; end;
+        if (shimmersSelected(4)), if shimmer4.start, startCount=startCount+1; end; end;
+        if (shimmersSelected(5)), if shimmer5.start, startCount=startCount+1; end; end;
+        if (shimmersSelected(6)), if shimmer6.start, startCount=startCount+1; end; end;
+        if (shimmersSelected(7)), if shimmer7.start, startCount=startCount+1; end; end;
+        
+        if length(find(shimmersSelected))==startCount
+            
             elapsedTime = 0;
             set(elapsedtime_h,'String',num2str(elapsedTime))
-            if (shimmer1.start && shimmer2.start) % && shimmer3.start && shimmer4.start && shimmer5.start && shimmer6.start) % && shimmer7.start)
+            
+            tic;
+            
+            dataShimmer1 = [];
+            dataShimmer2 = [];
+            dataShimmer3 = [];
+            dataShimmer4 = [];
+            dataShimmer5 = [];
+            dataShimmer6 = [];
+            dataShimmer7 = [];
+            
+            packetsReceivedShimmer1 = 0;
+            packetsReceivedShimmer2 = 0;
+            packetsReceivedShimmer3 = 0;
+            packetsReceivedShimmer4 = 0;
+            packetsReceivedShimmer5 = 0;
+            packetsReceivedShimmer6 = 0;
+            packetsReceivedShimmer7 = 0;
+            
+            battShimmer1 = 0;
+            battShimmer2 = 0;
+            battShimmer3 = 0;
+            battShimmer4 = 0;
+            battShimmer5 = 0;
+            battShimmer6 = 0;
+            battShimmer7 = 0;
+            
+            firsttime=true;
+            
+            while ~get(stop_h,'Value')
                 
-                tic;
+                pause(buffer)
                 
-                dataShimmer1 = [];
-                dataShimmer2 = [];
-                dataShimmer3 = [];
-                dataShimmer4 = [];
-                dataShimmer5 = [];
-                dataShimmer6 = [];
-                dataShimmer7 = [];
-                
-                packetsReceivedShimmer1 = 0;
-                packetsReceivedShimmer2 = 0;
-                packetsReceivedShimmer3 = 0;
-                packetsReceivedShimmer4 = 0;
-                packetsReceivedShimmer5 = 0;
-                packetsReceivedShimmer6 = 0;
-                packetsReceivedShimmer7 = 0;
-                
-                battShimmer1 = 0;
-                battShimmer2 = 0;
-                battShimmer3 = 0;
-                battShimmer4 = 0;
-                battShimmer5 = 0;
-                battShimmer6 = 0;
-                battShimmer7 = 0;
-                
-                firsttime=true;
-                
-                while ~get(stop_h,'Value')
-                    
-                    pause(buffer)
-                    
-                    % Read in Shimmer 1 data and header files
+                % Read in Shimmer 1 data and header files
+                if shimmersSelected(1)
                     [newDataShimmer1,signalNames,signalFormats,signalUnits]=shimmer1.getdata('c');
-                    
-                    if ~isempty(newDataShimmer1) 
+                    if ~isempty(newDataShimmer1)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,1));
                             signalNamesString = char(signalNames(1,1));
@@ -418,10 +517,12 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer1 = (((mean(newDataShimmer1(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
                     end
-                    
-                    % Read in Shimmer 2 data and header files
+                end
+                
+                % Read in Shimmer 2 data and header files
+                if shimmersSelected(2)
                     [newDataShimmer2,signalNames,signalFormats,signalUnits]=shimmer2.getdata('c');
-                    if ~isempty(newDataShimmer2) 
+                    if ~isempty(newDataShimmer2)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,2));
                             signalNamesString = char(signalNames(1,1));
@@ -457,94 +558,250 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer2 = (((mean(newDataShimmer2(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
                     end
-                          
-                    
-%                     if ~isempty(calDataShimmer3)
-%                         timeIndex = find(ismember(signalName, 'Time Stamp'));
-%                         timeDataShimmer3 = calDataShimmer3(:,timeIndex);
-%                         packetsReceivedShimmer3 = shimmer3.getpercentageofpacketsreceived(timeDataShimmer3);
-%                     end
-%                     
-%                     % Read and save packet reception rate for Shimmer 4
-%                     [calData,signalName,signalFormat,signalUnit]=shimmer4.getdata('c');
-%                     calDataShimmer4 = [calDataShimmer4; calData];
-%                     
-%                     if ~isempty(calDataShimmer4)
-%                         timeIndex = find(ismember(signalName, 'Time Stamp'));
-%                         timeDataShimmer4 = calDataShimmer4(:,timeIndex);
-%                         packetsReceivedShimmer4 = shimmer4.getpercentageofpacketsreceived(timeDataShimmer4);
-%                     end
-%                     
-%                     % Read and save packet reception rate for Shimmer 5
-%                     [calData,signalName,signalFormat,signalUnit]=shimmer5.getdata('c');
-%                     calDataShimmer5 = [calDataShimmer5; calData];
-%                     
-%                     
-%                     if ~isempty(calDataShimmer5)
-%                         timeIndex = find(ismember(signalName, 'Time Stamp'));
-%                         timeDataShimmer5 = calDataShimmer5(:,timeIndex);
-%                         packetsReceivedShimmer5 = shimmer5.getpercentageofpacketsreceived(timeDataShimmer5);
-%                     end
-%                     
-%                     % Read and save packet reception rate for Shimmer 6
-%                     [calData,signalName,signalFormat,signalUnit]=shimmer6.getdata('c');
-%                     calDataShimmer6 = [calDataShimmer6; calData];
-%                     
-%                     if ~isempty(calDataShimmer6)
-%                         timeIndex = find(ismember(signalName, 'Time Stamp'));
-%                         timeDataShimmer6 = calDataShimmer6(:,timeIndex);
-%                         packetsReceivedShimmer6 = shimmer6.getpercentageofpacketsreceived(timeDataShimmer6);
-%                     end
-                    
-                    % Read and save packet reception rate for Shimmer 7
-                    %             [calData,signalName,signalFormat,signalUnit]=shimmer7.getdata('c');
-                    %             calDataShimmer7 = [calDataShimmer7; calData];
-                    %
-                    %             if (length(calDataShimmer7)>numPlotSamples)
-                    %                 calDataShimmer7 = calDataShimmer7((length(calDataShimmer7)-numPlotSamples):end,:);
-                    %             end
-                    %
-                    %             if ~isempty(calDataShimmer7)
-                    %                 timeIndex = find(ismember(signalName, 'Time Stamp'));
-                    %                 timeDataShimmer7 = calDataShimmer7(:,timeIndex);
-                    %                 packetsReceivedShimmer7 = shimmer7.getpercentageofpacketsreceived(timeDataShimmer7);
-                    %             end
-                    tabledata = [packetsReceivedShimmer1 battShimmer1; packetsReceivedShimmer2 battShimmer2; packetsReceivedShimmer3 battShimmer3; packetsReceivedShimmer4 battShimmer4; packetsReceivedShimmer5 battShimmer5; packetsReceivedShimmer6 battShimmer6; packetsReceivedShimmer7 battShimmer7];
-                    set(table1_h,'Data',tabledata)
-                    
-                    elapsedTime = elapsedTime + toc;
-                    set(elapsedtime_h,'String',num2str(elapsedTime))
-                    tic; 
-                    
-                    firsttime=false;
                 end
+                
+                
+                % Read in Shimmer 3 data and header files
+                if shimmersSelected(3)
+                    [newDataShimmer3,signalNames,signalFormats,signalUnits]=shimmer3.getdata('c');
+                    if ~isempty(newDataShimmer3)
+                        if firsttime==true
+                            sensorNamesString = char(sensorNames(1,3));
+                            signalNamesString = char(signalNames(1,1));
+                            signalFormatsString = char(signalFormats(1,1));
+                            signalUnitsString = char(signalUnits(1,1));
+                            for i=2:length(signalNames)
+                                sensorNamesString = [sensorNamesString char(9) char(sensorNames(1,3))];
+                                signalNamesString = [signalNamesString char(9) char(signalNames(1,i))];
+                                signalFormatsString = [signalFormatsString char(9) char(signalFormats(1,i))];
+                                signalUnitsString = [signalUnitsString char(9) char(signalUnits(1,i))];
+                            end
+                            
+                            dlmwrite([pathname trialname ' - ' sensorNames{1,3} '.txt'], sensorNamesString, '%s')
+                            
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,3} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalNamesString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,3} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalFormatsString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,3} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalUnitsString);
+                            fclose(fid);
+                        end
+                        
+                        dlmwrite([pathname trialname ' - ' sensorNames{1,3} '.txt'], newDataShimmer2, '-append', 'delimiter', '\t','precision',16);
+                        sensorFlag(3) = 1;
+                        
+                        dataShimmer3 = [dataShimmer3; newDataShimmer3];
+                        timeIndex = find(ismember(signalNames, 'Time Stamp'));
+                        timeDataShimmer3 = dataShimmer3(:,timeIndex);
+                        packetsReceivedShimmer3 = shimmer3.getpercentageofpacketsreceived(timeDataShimmer3);
+                        battIndex = find(ismember(signalNames,'VSenseBatt'));
+                        battShimmer3 = (((mean(newDataShimmer3(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                    end
+                end
+                
+                % Read in Shimmer 4 data and header files
+                if shimmersSelected(4)
+                    [newDataShimmer4,signalNames,signalFormats,signalUnits]=shimmer4.getdata('c');
+                    if ~isempty(newDataShimmer4)
+                        if firsttime==true
+                            sensorNamesString = char(sensorNames(1,4));
+                            signalNamesString = char(signalNames(1,1));
+                            signalFormatsString = char(signalFormats(1,1));
+                            signalUnitsString = char(signalUnits(1,1));
+                            for i=2:length(signalNames)
+                                sensorNamesString = [sensorNamesString char(9) char(sensorNames(1,4))];
+                                signalNamesString = [signalNamesString char(9) char(signalNames(1,i))];
+                                signalFormatsString = [signalFormatsString char(9) char(signalFormats(1,i))];
+                                signalUnitsString = [signalUnitsString char(9) char(signalUnits(1,i))];
+                            end
+                            
+                            dlmwrite([pathname trialname ' - ' sensorNames{1,4} '.txt'], sensorNamesString, '%s')
+                            
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,4} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalNamesString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,4} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalFormatsString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,4} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalUnitsString);
+                            fclose(fid);
+                        end
+                        
+                        dlmwrite([pathname trialname ' - ' sensorNames{1,2} '.txt'], newDataShimmer2, '-append', 'delimiter', '\t','precision',16);
+                        sensorFlag(4) = 1;
+                        
+                        dataShimmer4 = [dataShimmer4; newDataShimmer4];
+                        timeIndex = find(ismember(signalNames, 'Time Stamp'));
+                        timeDataShimmer4 = dataShimmer4(:,timeIndex);
+                        packetsReceivedShimmer4 = shimmer4.getpercentageofpacketsreceived(timeDataShimmer4);
+                        battIndex = find(ismember(signalNames,'VSenseBatt'));
+                        battShimmer4 = (((mean(newDataShimmer4(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                    end
+                end
+                
+                % Read in Shimmer 5 data and header files
+                if shimmersSelected(5)
+                    [newDataShimmer5,signalNames,signalFormats,signalUnits]=shimmer5.getdata('c');
+                    if ~isempty(newDataShimmer5)
+                        if firsttime==true
+                            sensorNamesString = char(sensorNames(1,5));
+                            signalNamesString = char(signalNames(1,1));
+                            signalFormatsString = char(signalFormats(1,1));
+                            signalUnitsString = char(signalUnits(1,1));
+                            for i=2:length(signalNames)
+                                sensorNamesString = [sensorNamesString char(9) char(sensorNames(1,5))];
+                                signalNamesString = [signalNamesString char(9) char(signalNames(1,i))];
+                                signalFormatsString = [signalFormatsString char(9) char(signalFormats(1,i))];
+                                signalUnitsString = [signalUnitsString char(9) char(signalUnits(1,i))];
+                            end
+                            
+                            dlmwrite([pathname trialname ' - ' sensorNames{1,5} '.txt'], sensorNamesString, '%s')
+                            
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,5} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalNamesString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,5} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalFormatsString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,5} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalUnitsString);
+                            fclose(fid);
+                        end
+                        
+                        dlmwrite([pathname trialname ' - ' sensorNames{1,5} '.txt'], newDataShimmer5, '-append', 'delimiter', '\t','precision',16);
+                        sensorFlag(5) = 1;
+                        
+                        dataShimmer5 = [dataShimmer5; newDataShimmer5];
+                        timeIndex = find(ismember(signalNames, 'Time Stamp'));
+                        timeDataShimmer5 = dataShimmer5(:,timeIndex);
+                        packetsReceivedShimmer5 = shimmer5.getpercentageofpacketsreceived(timeDataShimmer5);
+                        battIndex = find(ismember(signalNames,'VSenseBatt'));
+                        battShimmer5 = (((mean(newDataShimmer5(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                    end
+                end
+                
+                % Read in Shimmer 6 data and header files
+                if shimmersSelected(6)
+                    [newDataShimmer6,signalNames,signalFormats,signalUnits]=shimmer6.getdata('c');
+                    if ~isempty(newDataShimmer6)
+                        if firsttime==true
+                            sensorNamesString = char(sensorNames(1,6));
+                            signalNamesString = char(signalNames(1,1));
+                            signalFormatsString = char(signalFormats(1,1));
+                            signalUnitsString = char(signalUnits(1,1));
+                            for i=2:length(signalNames)
+                                sensorNamesString = [sensorNamesString char(9) char(sensorNames(1,6))];
+                                signalNamesString = [signalNamesString char(9) char(signalNames(1,i))];
+                                signalFormatsString = [signalFormatsString char(9) char(signalFormats(1,i))];
+                                signalUnitsString = [signalUnitsString char(9) char(signalUnits(1,i))];
+                            end
+                            
+                            dlmwrite([pathname trialname ' - ' sensorNames{1,6} '.txt'], sensorNamesString, '%s')
+                            
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,6} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalNamesString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,6} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalFormatsString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,6} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalUnitsString);
+                            fclose(fid);
+                        end
+                        
+                        dlmwrite([pathname trialname ' - ' sensorNames{1,6} '.txt'], newDataShimmer6, '-append', 'delimiter', '\t','precision',16);
+                        sensorFlag(6) = 1;
+                        
+                        dataShimmer6 = [dataShimmer6; newDataShimmer6];
+                        timeIndex = find(ismember(signalNames, 'Time Stamp'));
+                        timeDataShimmer6 = dataShimmer6(:,timeIndex);
+                        packetsReceivedShimmer6 = shimmer6.getpercentageofpacketsreceived(timeDataShimmer6);
+                        battIndex = find(ismember(signalNames,'VSenseBatt'));
+                        battShimmer6 = (((mean(newDataShimmer6(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                    end
+                end
+                
+                % Read in Shimmer 2 data and header files
+                if shimmersSelected(7)
+                    [newDataShimmer7,signalNames,signalFormats,signalUnits]=shimmer7.getdata('c');
+                    if ~isempty(newDataShimmer7)
+                        if firsttime==true
+                            sensorNamesString = char(sensorNames(1,7));
+                            signalNamesString = char(signalNames(1,1));
+                            signalFormatsString = char(signalFormats(1,1));
+                            signalUnitsString = char(signalUnits(1,1));
+                            for i=2:length(signalNames)
+                                sensorNamesString = [sensorNamesString char(9) char(sensorNames(1,7))];
+                                signalNamesString = [signalNamesString char(9) char(signalNames(1,i))];
+                                signalFormatsString = [signalFormatsString char(9) char(signalFormats(1,i))];
+                                signalUnitsString = [signalUnitsString char(9) char(signalUnits(1,i))];
+                            end
+                            
+                            dlmwrite([pathname trialname ' - ' sensorNames{1,7} '.txt'], sensorNamesString, '%s')
+                            
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,7} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalNamesString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,7} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalFormatsString);
+                            fclose(fid);
+                            fid = fopen([pathname trialname ' - ' sensorNames{1,7} '.txt'],'a');
+                            fprintf(fid,'%s\n',signalUnitsString);
+                            fclose(fid);
+                        end
+                        
+                        dlmwrite([pathname trialname ' - ' sensorNames{1,7} '.txt'], newDataShimmer7, '-append', 'delimiter', '\t','precision',16);
+                        sensorFlag(7) = 1;
+                        
+                        dataShimmer7 = [dataShimmer7; newDataShimmer7];
+                        timeIndex = find(ismember(signalNames, 'Time Stamp'));
+                        timeDataShimmer7 = dataShimmer7(:,timeIndex);
+                        packetsReceivedShimmer7 = shimmer7.getpercentageofpacketsreceived(timeDataShimmer7);
+                        battIndex = find(ismember(signalNames,'VSenseBatt'));
+                        battShimmer7 = (((mean(newDataShimmer7(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                    end
+                end
+                
+                tabledata = [packetsReceivedShimmer1 battShimmer1; packetsReceivedShimmer2 battShimmer2; packetsReceivedShimmer3 battShimmer3; packetsReceivedShimmer4 battShimmer4; packetsReceivedShimmer5 battShimmer5; packetsReceivedShimmer6 battShimmer6; packetsReceivedShimmer7 battShimmer7];
+                set(table1_h,'Data',tabledata)
                 
                 elapsedTime = elapsedTime + toc;
                 set(elapsedtime_h,'String',num2str(elapsedTime))
+                tic;
                 
-                % Stop streaming
-                shimmer1.stop;
-                shimmer2.stop;
-%                 shimmer3.stop;
-%                 shimmer4.stop;
-%                 shimmer5.stop;
-%                 shimmer6.stop;
-                %shimmer7.stop;
-                
-                SortShimmerDataAPI(trialname,sensorFlag)
-                
-            else
-                shimmer1.stop;
-                shimmer2.stop;
-%                 shimmer3.stop;
-%                 shimmer4.stop;
-%                 shimmer5.stop;
-%                 shimmer6.stop;
-                 %shimmer7.stop;
+                firsttime=false;
             end
-
+            
+            elapsedTime = elapsedTime + toc;
+            set(elapsedtime_h,'String',num2str(elapsedTime))
+            
+            % Stop streaming
+            if (shimmersSelected(1)), shimmer1.stop; end;
+            if (shimmersSelected(2)), shimmer2.stop; end;
+            if (shimmersSelected(3)), shimmer3.stop; end;
+            if (shimmersSelected(4)), shimmer4.stop; end;
+            if (shimmersSelected(5)), shimmer5.stop; end;
+            if (shimmersSelected(6)), shimmer6.stop; end;
+            if (shimmersSelected(7)), shimmer7.stop; end;
+            
+            SortShimmerDataAPI(trialname,sensorFlag)
+            
+        else
+            if (shimmersSelected(1)), shimmer1.stop; end;
+            if (shimmersSelected(2)), shimmer2.stop; end;
+            if (shimmersSelected(3)), shimmer3.stop; end;
+            if (shimmersSelected(4)), shimmer4.stop; end;
+            if (shimmersSelected(5)), shimmer5.stop; end;
+            if (shimmersSelected(6)), shimmer6.stop; end;
+            if (shimmersSelected(7)), shimmer7.stop; end;
+        end
+        
     end
-    % Enable sensor parameters
+    % Re-enable sensor parameters
     set(emg_h,'Enable','on')
     set(gsr_h,'Enable','on')
     set(accelrange_h,'Enable','on')
@@ -557,13 +814,13 @@ if (shimmer1.connect && shimmer2.connect) % && shimmer3.connect && shimmer4.conn
     set(baudrate_h,'Enable','on')
     set(samprate_h,'Enable','on')
     
-    shimmer1.disconnect;
-    shimmer2.disconnect;
-%     shimmer3.disconnect;
-%     shimmer4.disconnect;
-%     shimmer5.disconnect;
-%     shimmer6.disconnect;
-    %shimmer7.disconnect;
+    if (shimmersSelected(1)), shimmer1.disconnect; end;
+    if (shimmersSelected(2)), shimmer2.disconnect; end;
+    if (shimmersSelected(3)), shimmer3.disconnect; end;
+    if (shimmersSelected(4)), shimmer4.disconnect; end;
+    if (shimmersSelected(5)), shimmer5.disconnect; end;
+    if (shimmersSelected(6)), shimmer6.disconnect; end;
+    if (shimmersSelected(7)), shimmer7.disconnect; end;
     
     clear all;
     
