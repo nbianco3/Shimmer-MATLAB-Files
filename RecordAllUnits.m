@@ -43,7 +43,7 @@ pathname = 'C:\Users\Nick\Documents\Parkinson Mobility Study\Shimmer MATLAB File
 
 disp('All')
 
-buffer = 1; % seconds
+buffer = 0.5; % seconds
 
 shimmer1 = ShimmerHandleClass('5');
 shimmer2 = ShimmerHandleClass('7');
@@ -974,6 +974,7 @@ if length(find(shimmersSelected))==connectCount
         waitfor(start_h,'Value',1)
         
         if get(disconnect_h,'Value')
+            disp('Disconnecting...')
             break;
         end
         
@@ -1176,7 +1177,7 @@ if length(find(shimmersSelected))==connectCount
                             fclose(fid);
                         end
                         
-                        dlmwrite([pathname trialname ' - ' sensorNames{1,2} '.txt'], newDataShimmer2, '-append', 'delimiter', '\t','precision',16);
+                        dlmwrite([pathname trialname ' - ' sensorNames{1,4} '.txt'], newDataShimmer2, '-append', 'delimiter', '\t','precision',16);
                         sensorFlag(4) = 1;
                         
                         dataShimmer4 = [dataShimmer4; newDataShimmer4];
