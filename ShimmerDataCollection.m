@@ -22,7 +22,7 @@ function varargout = ShimmerDataCollection(varargin)
 
 % Edit the above text to modify the response to help ShimmerDataCollection
 
-% Last Modified by GUIDE v2.5 12-Jun-2015 15:28:16
+% Last Modified by GUIDE v2.5 15-Jun-2015 11:20:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -87,7 +87,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 %% Connect/Disconnect Shimmers, Start/Stop Recording
 function connectbutton_Callback(hObject, eventdata, handles)
     % Retrieve handles
@@ -97,27 +96,29 @@ function connectbutton_Callback(hObject, eventdata, handles)
     trialnameObject = handles.trialname;
     trialname = get(trialnameObject,'String');
     
-    % Get data collection mode
-    modeObject = handles.modemenu;
-    contents = cellstr(get(modeObject,'String'));
-    mode = contents{get(modeObject,'Value')};
-    
     % Set defaults
     start_h = handles.startbutton;
     stop_h = handles.stopbutton;
     disconnect_h = handles.disconnectbutton;
     emg_h = handles.emgcheckbox;
+    emgrate_h = handles.emgratemenu;
+    emgresolution_h = handles.emgresolutionmenu;
+    emggain_h = handles.emggainmenu;
     gsr_h = handles.gsrcheckbox;
+    gsrrange_h = handles.gsrrangemenu;
+    lownoise_h = handles.lownoiseaccelcheckbox;
+    widerange_h = handles.widerangeaccelcheckbox;
     accelrange_h = handles.accelrangemenu;
     gyrorange_h = handles.gyrorangemenu;
     magrange_h = handles.magrangemenu;
     accelrate_h = handles.accelratemenu;
     gyrorate_h = handles.gyroratemenu;
-    magrate_h = handles.magratemenu;
-    emgrate_h = handles.emgratemenu;
+    magrate_h = handles.magratemenu; 
     baudrate_h = handles.baudratemenu;
     samprate_h = handles.samprate;
     sampratebool_h = handles.sampratebool;
+    pressure_h = handles.pressurecheckbox;
+    pressureresolution_h = handles.pressuremenu;
     params_h = handles.setparams;
     elapsedtime_h = handles.elapsedtime;
     enable2BD1_h = handles.enable2BD1;
@@ -132,17 +133,24 @@ function connectbutton_Callback(hObject, eventdata, handles)
     set(stop_h,'Value',0)
     set(disconnect_h,'Value',0)
     set(emg_h,'Value',1)
+    set(emgrate_h,'Value',1)
+    set(emgresolution_h,'Value',1)
+    set(emggain_h,'Value',1)
     set(gsr_h,'Value',1)
+    set(gsrrange_h,'Value',1)
+    set(lownoise_h,'Value',1)
+    set(widerange_h,'Value',0)
     set(accelrange_h,'Value',1)
     set(gyrorange_h,'Value',1)
     set(magrange_h,'Value',1)
     set(accelrate_h,'Value',1)
     set(gyrorate_h,'Value',1)
     set(magrate_h,'Value',1)
-    set(emgrate_h,'Value',1)
     set(baudrate_h,'Value',1)
     set(sampratebool_h,'Value',0)
     set(samprate_h,'Value',1)
+    set(pressure_h,'Value',0)
+    set(pressureresolution_h,'Value',1)
     set(params_h,'Value',0)
     set(elapsedtime_h,'String',0)
     set(enable2BD1_h,'Value',1)
@@ -155,24 +163,37 @@ function connectbutton_Callback(hObject, eventdata, handles)
     
     % Enable sensor parameters if disabled
     set(emg_h,'Enable','on')
+    set(emgrate_h,'Enable','on')
+    set(emgresolution_h,'Enable','on')
+    set(emggain_h,'Enable','on')
     set(gsr_h,'Enable','on')
+    set(gsrrange_h,'Enable','on')
+    set(lownoise_h,'Enable','on')
+    set(widerange_h,'Enable','on')
     set(accelrange_h,'Enable','on')
     set(gyrorange_h,'Enable','on')
     set(magrange_h,'Enable','on')
     set(accelrate_h,'Enable','on')
     set(gyrorate_h,'Enable','on')
     set(magrate_h,'Enable','on')
-    set(emgrate_h,'Enable','on')
     set(baudrate_h,'Enable','on')
     set(samprate_h,'Enable','on')
     set(sampratebool_h,'Enable','on')
+    set(pressure_h,'Enable','on')
+    set(pressureresolution_h,'Enable','on')
+    set(params_h,'Enable','on')
+    set(elapsedtime_h,'Enable','on')
+    set(enable2BD1_h,'Enable','on')
+    set(enable3A45_h,'Enable','on')
+    set(enable399C_h,'Enable','on')
+    set(enable3A1E_h,'Enable','on')
+    set(enable39F8_h,'Enable','on')
+    set(enable2BFD_h,'Enable','on')
+    set(enable38F5_h,'Enable','on')
     
     % Execute data collection
-    if strcmp(mode,'All Units')
-        RecordAllUnits(trialname)
-    elseif strcmp(mode,'ExG Units Only')
-        RecordExGUnits(trialname)
-    end
+    RecordAllUnits(trialname)
+
     
 % Disconnect Shimmers
 function disconnectbutton_Callback(hObject, eventdata, handles)
@@ -469,3 +490,166 @@ function enable38F5_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of enable38F5
+
+
+% --- Executes during object creation, after setting all properties.
+function elapsedtime_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to elapsedtime (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in emgresolutionmenu.
+function emgresolutionmenu_Callback(hObject, eventdata, handles)
+% hObject    handle to emgresolutionmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns emgresolutionmenu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from emgresolutionmenu
+
+
+% --- Executes during object creation, after setting all properties.
+function emgresolutionmenu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to emgresolutionmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in gsrrangemenu.
+function gsrrangemenu_Callback(hObject, eventdata, handles)
+% hObject    handle to gsrrangemenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns gsrrangemenu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from gsrrangemenu
+
+
+% --- Executes during object creation, after setting all properties.
+function gsrrangemenu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gsrrangemenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in emggainmenu.
+function emggainmenu_Callback(hObject, eventdata, handles)
+% hObject    handle to emggainmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns emggainmenu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from emggainmenu
+
+
+% --- Executes during object creation, after setting all properties.
+function emggainmenu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to emggainmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pressurecheckbox.
+function pressurecheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to pressurecheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of pressurecheckbox
+
+
+% --- Executes on selection change in pressuremenu.
+function pressuremenu_Callback(hObject, eventdata, handles)
+% hObject    handle to pressuremenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns pressuremenu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from pressuremenu
+
+
+% --- Executes during object creation, after setting all properties.
+function pressuremenu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pressuremenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in radiobutton1.
+function radiobutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton1
+
+
+% --- Executes on slider movement.
+function slider2_Callback(hObject, eventdata, handles)
+% hObject    handle to slider2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+% --- Executes during object creation, after setting all properties.
+function slider2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in lownoiseaccelcheckbox.
+function lownoiseaccelcheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to lownoiseaccelcheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of lownoiseaccelcheckbox
+
+
+% --- Executes on button press in widerangeaccelcheckbox.
+function widerangeaccelcheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to widerangeaccelcheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of widerangeaccelcheckbox
