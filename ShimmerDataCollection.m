@@ -22,7 +22,7 @@ function varargout = ShimmerDataCollection(varargin)
 
 % Edit the above text to modify the response to help ShimmerDataCollection
 
-% Last Modified by GUIDE v2.5 15-Jun-2015 11:20:55
+% Last Modified by GUIDE v2.5 23-Jun-2015 15:31:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -91,20 +91,29 @@ end
 function connectbutton_Callback(hObject, eventdata, handles)
     % Retrieve handles
     handles = guihandles(gcbo);
+    f = handles.figure1;
+%     tabgp = uitabgroup('Parent',f);
+%     tab0 = uitab('parent',tabgp,'title','Data Collection');
+%     tab1 = uitab('parent',tabgp,'title','Shimmer 1');
+%     tab2 = uitab('parent',tabgp,'title','Shimmer 2');
+%     tab3 = uitab('parent',tabgp,'title','Shimmer 3');
+%     tab4 = uitab('parent',tabgp,'title','Shimmer 4');
+%     tab5 = uitab('parent',tabgp,'title','Shimmer 5');
+%     tab6 = uitab('parent',tabgp,'title','Shimmer 6');
+%     tab7 = uitab('parent',tabgp,'title','Shimmer 7');
     
     % Get trial name
     trialnameObject = handles.trialname;
     trialname = get(trialnameObject,'String');
     
-    % Set defaults
+    % Assign variables to handles
+    modes_h = handles.defaultmodes;
     start_h = handles.startbutton;
     stop_h = handles.stopbutton;
     disconnect_h = handles.disconnectbutton;
-    emg_h = handles.emgcheckbox;
     emgrate_h = handles.emgratemenu;
     emgresolution_h = handles.emgresolutionmenu;
     emggain_h = handles.emggainmenu;
-    gsr_h = handles.gsrcheckbox;
     gsrrange_h = handles.gsrrangemenu;
     lownoise_h = handles.lownoiseaccelcheckbox;
     widerange_h = handles.widerangeaccelcheckbox;
@@ -128,15 +137,40 @@ function connectbutton_Callback(hObject, eventdata, handles)
     enable39F8_h = handles.enable39F8;
     enable2BFD_h = handles.enable2BFD;
     enable38F5_h = handles.enable38F5;
+    emg2_h = handles.emg2;
+    emg3_h = handles.emg3;
+    emg4_h = handles.emg4;
+    emg5_h = handles.emg5;
+    imu1_h = handles.imu1;
+    imu2_h = handles.imu2;
+    imu3_h = handles.imu3;
+    imu4_h = handles.imu4;
+    imu5_h = handles.imu5;
+    imu6_h = handles.imu6;
+    imu7_h = handles.imu7;
+    gsr_h = handles.gsrcheckbox;
+    plot1_h = handles.plot1;
+    plot2_h = handles.plot2;
+    plot3_h = handles.plot3;
+    plot4_h = handles.plot4;
+    plot5_h = handles.plot5;
+    plot6_h = handles.plot6;
+    plot7_h = handles.plot7;
     
+%     pos = get(start_h,'position')
+%     set(start_h,'Parent',tab0)
+%     pos
+%     set(start_h,'units','pixels','position',[pos(1) pos(2) pos(3) pos(4)])
+%     get(start_h,'position')
+%     keyboard
+    
+    % Set defaults
     set(start_h,'Value',0)
     set(stop_h,'Value',0)
     set(disconnect_h,'Value',0)
-    set(emg_h,'Value',1)
     set(emgrate_h,'Value',1)
     set(emgresolution_h,'Value',1)
     set(emggain_h,'Value',1)
-    set(gsr_h,'Value',1)
     set(gsrrange_h,'Value',1)
     set(lownoise_h,'Value',1)
     set(widerange_h,'Value',0)
@@ -153,20 +187,134 @@ function connectbutton_Callback(hObject, eventdata, handles)
     set(pressureresolution_h,'Value',1)
     set(params_h,'Value',0)
     set(elapsedtime_h,'String',0)
-    set(enable2BD1_h,'Value',1)
-    set(enable3A45_h,'Value',1)
-    set(enable399C_h,'Value',1)
-    set(enable3A1E_h,'Value',1)
-    set(enable39F8_h,'Value',1)
-    set(enable2BFD_h,'Value',1)
+    set(enable2BD1_h,'Value',0)
+    set(enable3A45_h,'Value',0)
+    set(enable399C_h,'Value',0)
+    set(enable3A1E_h,'Value',0)
+    set(enable39F8_h,'Value',0)
+    set(enable2BFD_h,'Value',0)
     set(enable38F5_h,'Value',0)
+    set(imu1_h,'Value',0)
+    set(imu2_h,'Value',0)
+    set(imu3_h,'Value',0)
+    set(imu4_h,'Value',0)
+    set(imu5_h,'Value',0)
+    set(imu6_h,'Value',0)
+    set(imu7_h,'Value',0)
+    set(emg2_h,'Value',0)
+    set(emg3_h,'Value',0)
+    set(emg4_h,'Value',0)
+    set(emg5_h,'Value',0)
+    set(gsr_h,'Value',0)
+    
+    switch get(modes_h,'Value')
+        case 1 % IMU
+            set(enable2BD1_h,'Value',1)
+            set(enable3A45_h,'Value',1)
+            set(enable399C_h,'Value',1)
+            set(enable3A1E_h,'Value',1)
+            set(enable39F8_h,'Value',1)
+            set(enable2BFD_h,'Value',1)
+            set(enable38F5_h,'Value',0)
+            set(imu1_h,'Value',1)
+            set(imu2_h,'Value',1)
+            set(imu3_h,'Value',1)
+            set(imu4_h,'Value',1)
+            set(imu5_h,'Value',1)
+            set(imu6_h,'Value',1)
+            set(imu7_h,'Value',1)
+        case 2 % EMG
+            set(enable3A45_h,'Value',1)
+            set(enable399C_h,'Value',1)
+            set(enable3A1E_h,'Value',1)
+            set(enable39F8_h,'Value',1)
+            set(emg2_h,'Value',1)
+            set(emg3_h,'Value',1)
+            set(emg4_h,'Value',1)
+            set(emg5_h,'Value',1)
+        case 3 % GSR
+            set(enable2BFD_h,'Value',1)
+            set(gsr_h,'Value',1)
+        case 4 % IMU+GSR
+            set(enable2BD1_h,'Value',1)
+            set(enable3A45_h,'Value',1)
+            set(enable399C_h,'Value',1)
+            set(enable3A1E_h,'Value',1)
+            set(enable39F8_h,'Value',1)
+            set(enable2BFD_h,'Value',1)
+            set(enable38F5_h,'Value',0)
+            set(imu1_h,'Value',1)
+            set(imu2_h,'Value',1)
+            set(imu3_h,'Value',1)
+            set(imu4_h,'Value',1)
+            set(imu5_h,'Value',1)
+            set(imu6_h,'Value',1)
+            set(imu7_h,'Value',1)
+            set(gsr_h,'Value',1)
+        case 5 % IMU+EMG
+            set(enable2BD1_h,'Value',1)
+            set(enable3A45_h,'Value',1)
+            set(enable399C_h,'Value',1)
+            set(enable3A1E_h,'Value',1)
+            set(enable39F8_h,'Value',1)
+            set(enable2BFD_h,'Value',1)
+            set(enable38F5_h,'Value',0)
+            set(imu1_h,'Value',1)
+            set(imu2_h,'Value',1)
+            set(imu3_h,'Value',1)
+            set(imu4_h,'Value',1)
+            set(imu5_h,'Value',1)
+            set(imu6_h,'Value',1)
+            set(imu7_h,'Value',1)
+            set(emg2_h,'Value',1)
+            set(emg3_h,'Value',1)
+            set(emg4_h,'Value',1)
+            set(emg5_h,'Value',1)
+        case 6 % EMG+GSR
+            set(enable3A45_h,'Value',1)
+            set(enable399C_h,'Value',1)
+            set(enable3A1E_h,'Value',1)
+            set(enable39F8_h,'Value',1)
+            set(emg2_h,'Value',1)
+            set(emg3_h,'Value',1)
+            set(emg4_h,'Value',1)
+            set(emg5_h,'Value',1)        
+            set(enable2BFD_h,'Value',1)
+            set(gsr_h,'Value',1)
+        case 7 % IMU+EMG+GSR
+            set(enable2BD1_h,'Value',1)
+            set(enable3A45_h,'Value',1)
+            set(enable399C_h,'Value',1)
+            set(enable3A1E_h,'Value',1)
+            set(enable39F8_h,'Value',1)
+            set(enable2BFD_h,'Value',1)
+            set(enable38F5_h,'Value',0)
+            set(imu1_h,'Value',1)
+            set(imu2_h,'Value',1)
+            set(imu3_h,'Value',1)
+            set(imu4_h,'Value',1)
+            set(imu5_h,'Value',1)
+            set(imu6_h,'Value',1)
+            set(imu7_h,'Value',1)
+            set(emg2_h,'Value',1)
+            set(emg3_h,'Value',1)
+            set(emg4_h,'Value',1)
+            set(emg5_h,'Value',1)
+            set(gsr_h,'Value',1)
+    end  
+    
+    set(plot1_h,'Value',0)
+    set(plot2_h,'Value',0)
+    set(plot3_h,'Value',0)
+    set(plot4_h,'Value',0)
+    set(plot5_h,'Value',0)
+    set(plot6_h,'Value',0)
+    set(plot7_h,'Value',0)
     
     % Enable sensor parameters if disabled
-    set(emg_h,'Enable','on')
     set(emgrate_h,'Enable','on')
     set(emgresolution_h,'Enable','on')
     set(emggain_h,'Enable','on')
-    set(gsr_h,'Enable','on')
     set(gsrrange_h,'Enable','on')
     set(lownoise_h,'Enable','on')
     set(widerange_h,'Enable','on')
@@ -190,11 +338,22 @@ function connectbutton_Callback(hObject, eventdata, handles)
     set(enable39F8_h,'Enable','on')
     set(enable2BFD_h,'Enable','on')
     set(enable38F5_h,'Enable','on')
+    set(emg2_h,'Enable','on')
+    set(emg3_h,'Enable','on')
+    set(emg4_h,'Enable','on')
+    set(emg5_h,'Enable','on')
+    set(imu1_h,'Enable','on')
+    set(imu2_h,'Enable','on')
+    set(imu3_h,'Enable','on')
+    set(imu4_h,'Enable','on')
+    set(imu5_h,'Enable','on')
+    set(imu6_h,'Enable','on')
+    set(imu7_h,'Enable','on')
+    set(gsr_h,'Enable','on')
     
     % Execute data collection
     RecordAllUnits(trialname)
-
-    
+  
 % Disconnect Shimmers
 function disconnectbutton_Callback(hObject, eventdata, handles)
 
@@ -653,3 +812,215 @@ function widerangeaccelcheckbox_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of widerangeaccelcheckbox
+
+
+% --- Executes on button press in imu1.
+function imu1_Callback(hObject, eventdata, handles)
+% hObject    handle to imu1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of imu1
+
+
+% --- Executes on button press in imu2.
+function imu2_Callback(hObject, eventdata, handles)
+% hObject    handle to imu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of imu2
+
+
+% --- Executes on button press in imu3.
+function imu3_Callback(hObject, eventdata, handles)
+% hObject    handle to imu3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of imu3
+
+
+% --- Executes on button press in imu4.
+function imu4_Callback(hObject, eventdata, handles)
+% hObject    handle to imu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of imu4
+
+
+% --- Executes on button press in imu5.
+function imu5_Callback(hObject, eventdata, handles)
+% hObject    handle to imu5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of imu5
+
+
+% --- Executes on button press in imu6.
+function imu6_Callback(hObject, eventdata, handles)
+% hObject    handle to imu6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of imu6
+
+
+% --- Executes on button press in imu7.
+function imu7_Callback(hObject, eventdata, handles)
+% hObject    handle to imu7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of imu7
+
+
+% --- Executes on button press in emg1.
+function emg1_Callback(hObject, eventdata, handles)
+% hObject    handle to emg1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of emg1
+
+
+% --- Executes on button press in emg2.
+function emg2_Callback(hObject, eventdata, handles)
+% hObject    handle to emg2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of emg2
+
+
+% --- Executes on button press in emg3.
+function emg3_Callback(hObject, eventdata, handles)
+% hObject    handle to emg3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of emg3
+
+
+% --- Executes on button press in emg4.
+function emg4_Callback(hObject, eventdata, handles)
+% hObject    handle to emg4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of emg4
+
+
+% --- Executes on button press in emg5.
+function emg5_Callback(hObject, eventdata, handles)
+% hObject    handle to emg5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of emg5
+
+
+% --- Executes on button press in emg6.
+function emg6_Callback(hObject, eventdata, handles)
+% hObject    handle to emg6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of emg6
+
+
+% --- Executes on button press in emg7.
+function emg7_Callback(hObject, eventdata, handles)
+% hObject    handle to emg7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of emg7
+
+
+% --- Executes on selection change in defaultmodes.
+function defaultmodes_Callback(hObject, eventdata, handles)
+% hObject    handle to defaultmodes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns defaultmodes contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from defaultmodes
+
+
+% --- Executes during object creation, after setting all properties.
+function defaultmodes_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to defaultmodes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in plot1.
+function plot1_Callback(hObject, eventdata, handles)
+% hObject    handle to plot1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of plot1
+
+
+% --- Executes on button press in plot2.
+function plot2_Callback(hObject, eventdata, handles)
+% hObject    handle to plot2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of plot2
+
+
+% --- Executes on button press in plot3.
+function plot3_Callback(hObject, eventdata, handles)
+% hObject    handle to plot3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of plot3
+
+
+% --- Executes on button press in plot4.
+function plot4_Callback(hObject, eventdata, handles)
+% hObject    handle to plot4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of plot4
+
+
+% --- Executes on button press in plot5.
+function plot5_Callback(hObject, eventdata, handles)
+% hObject    handle to plot5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of plot5
+
+
+% --- Executes on button press in plot6.
+function plot6_Callback(hObject, eventdata, handles)
+% hObject    handle to plot6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of plot6
+
+
+% --- Executes on button press in plot7.
+function plot7_Callback(hObject, eventdata, handles)
+% hObject    handle to plot7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of plot7

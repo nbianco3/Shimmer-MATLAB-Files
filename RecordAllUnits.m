@@ -7,11 +7,9 @@ handles = guihandles(gcbo);
 start_h = handles.startbutton;
 stop_h = handles.stopbutton;
 disconnect_h = handles.disconnectbutton;
-emg_h = handles.emgcheckbox;
 emgrate_h = handles.emgratemenu;
 emgresolution_h = handles.emgresolutionmenu;
 emggain_h = handles.emggainmenu;
-gsr_h = handles.gsrcheckbox;
 gsrrange_h = handles.gsrrangemenu;
 lownoise_h = handles.lownoiseaccelcheckbox;
 widerange_h = handles.widerangeaccelcheckbox;
@@ -35,6 +33,25 @@ enable3A1E_h = handles.enable3A1E;
 enable39F8_h = handles.enable39F8;
 enable2BFD_h = handles.enable2BFD;
 enable38F5_h = handles.enable38F5;
+emg2_h = handles.emg2;
+emg3_h = handles.emg3;
+emg4_h = handles.emg4;
+emg5_h = handles.emg5;
+imu1_h = handles.imu1;
+imu2_h = handles.imu2;
+imu3_h = handles.imu3;
+imu4_h = handles.imu4;
+imu5_h = handles.imu5;
+imu6_h = handles.imu6;
+imu7_h = handles.imu7;
+gsr_h = handles.gsrcheckbox;
+plot1_h = handles.plot1;
+plot2_h = handles.plot2;
+plot3_h = handles.plot3;
+plot4_h = handles.plot4;
+plot5_h = handles.plot5;
+plot6_h = handles.plot6;
+plot7_h = handles.plot7;
 table1_h = handles.uitable1;
 
 sensorFlag = [0 0 0 0 0 0 0];
@@ -43,7 +60,7 @@ pathname = 'C:\Users\Nick\Documents\Parkinson Mobility Study\Shimmer MATLAB File
 
 disp('All')
 
-buffer = 0.5; % seconds
+buffer = 1; % seconds
 
 shimmer1 = ShimmerHandleClass('5');
 shimmer2 = ShimmerHandleClass('7');
@@ -61,14 +78,14 @@ sensorNames = {'Unit2BD1','Unit3A45','Unit399C','Unit3A1E','Unit39F8','Unit2BFD'
 disp('Select sensor options, then press <Set Parameters>...')
 waitfor(params_h,'Value',1)
 
-% EMG collection
-switch get(emg_h,'Value')
-    case 1
-        exgFlag = true; % default
-    case 0
-        exgFlag = false;
-end
-set(emg_h,'Enable','off')
+% Get enabled EMG sensor flags
+emgFlag = [0 get(emg2_h,'Value') get(emg3_h,'Value') get(emg4_h,'Value') get(emg5_h,'Value') 0 0];
+
+% Get enabled IMU sensor flags
+imuFlag = [get(imu1_h,'Value') get(imu2_h,'Value') get(imu3_h,'Value') get(imu4_h,'Value') get(imu5_h,'Value') get(imu6_h,'Value') get(imu7_h,'Value')];
+
+% Get enabled plot flags
+plotFlag = [get(plot1_h,'Value') get(plot2_h,'Value') get(plot3_h,'Value') get(plot4_h,'Value') get(plot5_h,'Value') get(plot6_h,'Value') get(plot7_h,'Value')];
 
 % EMG gain
 contents = cellstr(get(emggain_h,'String'));
@@ -117,17 +134,38 @@ switch get(gsrrange_h,'Value')
 end
 set(gsrrange_h,'Enable','off')
 
+% General sampling rate (Hz)
+if get(sampratebool_h,'Value')
+    Fs = str2double(get(samprate_h,'String'));
+    numSamples = floor(Fs*2);
+else
+    if any(emgFlag)
+        set(samprate_h,'String','1200')
+        Fs = str2double(get(samprate_h,'String'));
+        numSamples = 2500;
+    else
+        set(samprate_h,'String','64')
+        Fs = str2double(get(samprate_h,'String'));
+        numSamples = 250;
+    end
+end
+set(samprate_h,'Enable','off')
+
 % Wide Range Acclerometer range (±g)
 contents = cellstr(get(accelrange_h,'String'));
 switch contents{get(accelrange_h,'Value')}
     case '2 (default)'
         accel_range = 0;
+        wraccelaxis = [0 numSamples -2 2];
     case '4'
         accel_range = 1;
+        wraccelaxis = [0 numSamples -4 4];
     case '8'
         accel_range = 2;
+        wraccelaxis = [0 numSamples -8 8];
     case '16'
         accel_range = 3;
+        wraccelaxis = [0 numSamples -16 16];
 end
 set(accelrange_h,'Enable','off')
 
@@ -136,12 +174,16 @@ contents = cellstr(get(gyrorange_h,'String'));
 switch contents{get(gyrorange_h,'Value')}
     case '250'
         gyro_range = 0;
+        gyroaxis = [0 numSamples -250 250];
     case '500 (default)'
         gyro_range = 1;
+        gyroaxis = [0 numSamples -500 500];
     case '1000'
         gyro_range = 2;
+        gyroaxis = [0 numSamples -1000 1000];
     case '2000'
         gyro_range = 3;
+        gyroaxis = [0 numSamples -2000 2000];
 end
 set(gyrorange_h,'Enable','off')
 
@@ -150,18 +192,25 @@ contents = cellstr(get(magrange_h,'String'));
 switch contents{get(magrange_h,'Value')}
     case '1.3 (default)'
         mag_range = 1;
+        magaxis = [0 numSamples -1.3 1.3];
     case '1.9'
         mag_range = 2;
-    case '2.5'
+        magaxis = [0 numSamples -1.9 1.9];
+    case '2.5' 
         mag_range = 3;
+        magaxis = [0 numSamples -2.5 2.5];
     case '4.0'
         mag_range = 4;
+        magaxis = [0 numSamples -4.0 4.0];
     case '4.7'
         mag_range = 5;
+        magaxis = [0 numSamples -4.7 4.7];
     case '5.6'
         mag_range = 6;
+        magaxis = [0 numSamples -5.6 5.6];
     case '8.1'
         mag_range = 7;
+        magaxis = [0 numSamples -8.1 8.1];
 end
 set(magrange_h,'Enable','off')
 
@@ -236,9 +285,9 @@ switch contents{get(emgrate_h,'Value')}
         exg_rate = 1;
     case '500'
         exg_rate = 2;
-    case '1000 (default)'
+    case '1000'
         exg_rate = 3;
-    case '2000'
+    case '2000 (default)'
         exg_rate = 4;
     case '4000'
         exg_rate = 5;
@@ -298,10 +347,6 @@ switch contents{get(baudrate_h,'Value')}
 end
 set(baudrate_h,'Enable','off')
 
-% General sampling rate (Hz)
-Fs = str2double(get(samprate_h,'String'));
-set(samprate_h,'Enable','off')
-
 set(enable2BD1_h,'Enable','off')
 set(enable3A45_h,'Enable','off')
 set(enable399C_h,'Enable','off')
@@ -310,9 +355,22 @@ set(enable39F8_h,'Enable','off')
 set(enable2BFD_h,'Enable','off')
 set(enable38F5_h,'Enable','off')
 
+set(emg2_h,'Enable','off')
+set(emg3_h,'Enable','off')
+set(emg4_h,'Enable','off')
+set(emg5_h,'Enable','off')
+set(imu1_h,'Enable','off')
+set(imu2_h,'Enable','off')
+set(imu3_h,'Enable','off')
+set(imu4_h,'Enable','off')
+set(imu5_h,'Enable','off')
+set(imu6_h,'Enable','off')
+set(imu7_h,'Enable','off')
+set(gsr_h,'Enable','off')
+
 set(params_h,'Enable','off')
 
-% Connect Shimmers
+%% Connect Shimmers
 shimmersSelected = zeros(1,7);
 if get(enable2BD1_h,'Value'), shimmersSelected(1)=true; end
 if get(enable3A45_h,'Value'), shimmersSelected(2)=true; end
@@ -335,140 +393,177 @@ if length(find(shimmersSelected))==connectCount
  
     %% Set Parameters
     
-    % Shimmer 1 (BTID 2BD1 - IMU unit)
+    %% Shimmer 1 (BTID 2BD1 - IMU unit)
     if shimmersSelected(1)
         shimmer1.setbaudrate(baud_rate);
-        shimmer1.setinternalboard('None');
         shimmer1.disableallsensors;
         
-        if get(lownoise_h,'Value') && get(widerange_h,'Value')
-            if pressureFlag
-                shimmer1.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-            else
-                shimmer1.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+        shimmer1.setinternalboard('None');
+        if imuFlag(1)
+            if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                if pressureFlag
+                    shimmer1.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                else
+                    shimmer1.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                end
+            elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                if pressureFlag
+                    shimmer1.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                else
+                    shimmer1.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                end
+            elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                if pressureFlag
+                    shimmer1.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                else
+                    shimmer1.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                end
+            elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                if pressureFlag
+                    shimmer1.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                else
+                    shimmer1.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                end
             end
-        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+        else
             if pressureFlag
-                shimmer1.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                shimmer1.setenabledsensors(macros.BATT,1,macros.PRESSURE,1);
             else
-                shimmer1.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                shimmer1.setenabledsensors(macros.BATT,1);
             end
-        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-            if pressureFlag
-                shimmer1.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-            else
-                shimmer1.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-            end
-        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-            if pressureFlag
-                shimmer1.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-            else
-                shimmer1.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-            end
-        end
-               
-        switch get(sampratebool_h,'Value')
-            case 0
-                shimmer1.setaccelrate(accel_rate);
-                shimmer1.setgyrorate(gyro_rate);
-                shimmer1.setmagrate(mag_rate);
-            case 1
-                shimmer1.setsamplingrate(Fs);
         end
         
-        shimmer1.setaccelrange(accel_range);
-        shimmer1.setgyrorange(gyro_range);
-        shimmer1.setmagrange(mag_range);
+        if pressureFlag
+            shimmer1.setpressureresolution(pressure_resolution);
+        end
+        
+        shimmer1.setsamplingrate(Fs);
+        if imuFlag(1)
+            shimmer1.setaccelrate(accel_rate);
+            shimmer1.setgyrorate(gyro_rate);
+            shimmer1.setmagrate(mag_rate);
+            shimmer1.setaccelrange(accel_range);
+            shimmer1.setgyrorange(gyro_range);
+            shimmer1.setmagrange(mag_range);
+        end
     end
     
-    % Shimmer 2 (BTID 3A45 - Shimmer3 unit)
+    %% Shimmer 2 (BTID 3A45 - ExG unit)
     if shimmersSelected(2)
         shimmer2.setbaudrate(baud_rate);
         shimmer2.disableallsensors;
-        if exgFlag == true
+        
+        % Options if EMG enabled
+        if emgFlag(2)
             shimmer2.setinternalboard('EMG');
             contents = cellstr(get(emgresolution_h,'String'));
             switch contents{get(emgresolution_h,'Value')}
                 case '16 BIT'
-                    if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                    if imuFlag(2)
+                        if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end,
+                        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
                         end
-                    elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    else
                         if pressureFlag
-                            shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            shimmer2.setenabledsensors(macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
                         else
-                            shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            shimmer2.setenabledsensors(macros.BATT,1,macros.EMG16BIT,1);
                         end
                     end
                 case '24 BIT (default)'
-                    if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                    if imuFlag(2)
+                        if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end,
+                        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
                         end
-                    elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    else
                         if pressureFlag
-                            shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            shimmer2.setenabledsensors(macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
                         else
-                            shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            shimmer2.setenabledsensors(macros.BATT,1,macros.EMG24BIT,1);
                         end
                     end
-                    shimmer2.setexggain(emg_gain,1,1);
-                    shimmer2.setexggain(emg_gain,1,2);
             end
-        elseif exgFlag==false
+            shimmer2.setexggain(emg_gain,1,1);
+            shimmer2.setexggain(emg_gain,1,2); 
+            
+        % Options if EMG disabled
+        elseif ~emgFlag(2)
             shimmer2.setinternalboard('None');
-            if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+            if imuFlag(2)
+                if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer2.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
                 end
-            elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+            else
                 if pressureFlag
-                    shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    shimmer2.setenabledsensors(macros.BATT,1,macros.PRESSURE,1);
                 else
-                    shimmer2.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer2.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer2.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    shimmer2.setenabledsensors(macros.BATT,1);
                 end
             end
         end
@@ -477,111 +572,139 @@ if length(find(shimmersSelected))==connectCount
             shimmer2.setpressureresolution(pressure_resolution);
         end
         
-        switch get(sampratebool_h,'Value')
-            case 0
-                shimmer2.setaccelrate(accel_rate);
-                shimmer2.setgyrorate(gyro_rate);
-                shimmer2.setmagrate(mag_rate);
-                shimmer2.setexgrate(exg_rate,1);
-                shimmer2.setexgrate(exg_rate,2);
-            case 1
-                shimmer2.setsamplingrate(Fs);
+        shimmer2.setsamplingrate(Fs);
+        if imuFlag(2)
+            shimmer2.setaccelrate(accel_rate);
+            shimmer2.setgyrorate(gyro_rate);
+            shimmer2.setmagrate(mag_rate);
+            shimmer2.setaccelrange(accel_range);
+            shimmer2.setgyrorange(gyro_range);
+            shimmer2.setmagrange(mag_range);
+        end
+        if emgFlag(2)
+            shimmer2.setexgrate(exg_rate,1);
+            shimmer2.setexgrate(exg_rate,2);
         end
         
-        shimmer2.setaccelrange(accel_range);
-        shimmer2.setgyrorange(gyro_range);
-        shimmer2.setmagrange(mag_range);
         
     end
     
-    % Shimmer 3 (BTID 399C - Shimmer3 unit)
+    %% Shimmer 3 (BTID 399C - ExG unit)
     if shimmersSelected(3)
         shimmer3.setbaudrate(baud_rate);
         shimmer3.disableallsensors;
-        if exgFlag == true
+        
+        % Options if EMG enabled
+        if emgFlag(3)
             shimmer3.setinternalboard('EMG');
             contents = cellstr(get(emgresolution_h,'String'));
             switch contents{get(emgresolution_h,'Value')}
                 case '16 BIT'
-                    if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                    if imuFlag(3)
+                        if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end,
+                        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
                         end
-                    elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    else
                         if pressureFlag
-                            shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            shimmer3.setenabledsensors(macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
                         else
-                            shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            shimmer3.setenabledsensors(macros.BATT,1,macros.EMG16BIT,1);
                         end
                     end
                 case '24 BIT (default)'
-                    if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                    if imuFlag(3)
+                        if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end,
+                        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
                         end
-                    elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    else
                         if pressureFlag
-                            shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            shimmer3.setenabledsensors(macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
                         else
-                            shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            shimmer3.setenabledsensors(macros.BATT,1,macros.EMG24BIT,1);
                         end
                     end
-                    shimmer3.setexggain(emg_gain,1,1);
-                    shimmer3.setexggain(emg_gain,1,2);
             end
-        elseif exgFlag==false
+            shimmer3.setexggain(emg_gain,1,1);
+            shimmer3.setexggain(emg_gain,1,2); 
+            
+        % Options if EMG disabled
+        elseif ~emgFlag(3)
             shimmer3.setinternalboard('None');
-            if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+            if imuFlag(3)
+                if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer3.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
                 end
-            elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+            else
                 if pressureFlag
-                    shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    shimmer3.setenabledsensors(macros.BATT,1,macros.PRESSURE,1);
                 else
-                    shimmer3.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer3.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer3.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    shimmer3.setenabledsensors(macros.BATT,1);
                 end
             end
         end
@@ -590,111 +713,138 @@ if length(find(shimmersSelected))==connectCount
             shimmer3.setpressureresolution(pressure_resolution);
         end
         
-        switch get(sampratebool_h,'Value')
-            case 0
-                shimmer3.setaccelrate(accel_rate);
-                shimmer3.setgyrorate(gyro_rate);
-                shimmer3.setmagrate(mag_rate);
-                shimmer3.setexgrate(exg_rate,1);
-                shimmer3.setexgrate(exg_rate,2);
-            case 1
-                shimmer3.setsamplingrate(Fs);
+        shimmer3.setsamplingrate(Fs);
+        if imuFlag(3)
+            shimmer3.setaccelrate(accel_rate);
+            shimmer3.setgyrorate(gyro_rate);
+            shimmer3.setmagrate(mag_rate);
+            shimmer3.setaccelrange(accel_range);
+            shimmer3.setgyrorange(gyro_range);
+            shimmer3.setmagrange(mag_range);
         end
-        
-        shimmer3.setaccelrange(accel_range);
-        shimmer3.setgyrorange(gyro_range);
-        shimmer3.setmagrange(mag_range);
-        
+        if emgFlag(3)
+            shimmer3.setexgrate(exg_rate,1);
+            shimmer3.setexgrate(exg_rate,2);
+        end
+
     end
     
-    % Shimmer 4 (BTID 3A1E - Shimmer3 unit)
+    %% Shimmer 4 (BTID 3A1E - ExG unit)
     if shimmersSelected(4)
         shimmer4.setbaudrate(baud_rate);
         shimmer4.disableallsensors;
-        if exgFlag == true
+        
+        % Options if EMG enabled
+        if emgFlag(4)
             shimmer4.setinternalboard('EMG');
             contents = cellstr(get(emgresolution_h,'String'));
             switch contents{get(emgresolution_h,'Value')}
                 case '16 BIT'
-                    if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                    if imuFlag(4)
+                        if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end,
+                        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
                         end
-                    elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    else
                         if pressureFlag
-                            shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            shimmer4.setenabledsensors(macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
                         else
-                            shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            shimmer4.setenabledsensors(macros.BATT,1,macros.EMG16BIT,1);
                         end
                     end
                 case '24 BIT (default)'
-                    if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                    if imuFlag(4)
+                        if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end,
+                        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
                         end
-                    elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    else
                         if pressureFlag
-                            shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            shimmer4.setenabledsensors(macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
                         else
-                            shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            shimmer4.setenabledsensors(macros.BATT,1,macros.EMG24BIT,1);
                         end
                     end
-                    shimmer4.setexggain(emg_gain,1,1);
-                    shimmer4.setexggain(emg_gain,1,2);
             end
-        elseif exgFlag==false
+            shimmer4.setexggain(emg_gain,1,1);
+            shimmer4.setexggain(emg_gain,1,2); 
+            
+        % Options if EMG disabled
+        elseif ~emgFlag(4)
             shimmer4.setinternalboard('None');
-            if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+            if imuFlag(4)
+                if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer4.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
                 end
-            elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+            else
                 if pressureFlag
-                    shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    shimmer4.setenabledsensors(macros.BATT,1,macros.PRESSURE,1);
                 else
-                    shimmer4.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer4.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer4.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    shimmer4.setenabledsensors(macros.BATT,1);
                 end
             end
         end
@@ -703,111 +853,138 @@ if length(find(shimmersSelected))==connectCount
             shimmer4.setpressureresolution(pressure_resolution);
         end
         
-        switch get(sampratebool_h,'Value')
-            case 0
-                shimmer4.setaccelrate(accel_rate);
-                shimmer4.setgyrorate(gyro_rate);
-                shimmer4.setmagrate(mag_rate);
-                shimmer4.setexgrate(exg_rate,1);
-                shimmer4.setexgrate(exg_rate,2);
-            case 1
-                shimmer4.setsamplingrate(Fs);
+        shimmer4.setsamplingrate(Fs);
+        if imuFlag(4)
+            shimmer4.setaccelrate(accel_rate);
+            shimmer4.setgyrorate(gyro_rate);
+            shimmer4.setmagrate(mag_rate);
+            shimmer4.setaccelrange(accel_range);
+            shimmer4.setgyrorange(gyro_range);
+            shimmer4.setmagrange(mag_range);
         end
-        
-        shimmer4.setaccelrange(accel_range);
-        shimmer4.setgyrorange(gyro_range);
-        shimmer4.setmagrange(mag_range);
-        
+        if emgFlag(4)
+            shimmer4.setexgrate(exg_rate,1);
+            shimmer4.setexgrate(exg_rate,2);
+        end
+
     end
     
-    % Shimmer 5 (BTID 39F8 - Shimmer3 unit)
+    %% Shimmer 5 (BTID 39F8 - ExG unit)
     if shimmersSelected(5)
         shimmer5.setbaudrate(baud_rate);
         shimmer5.disableallsensors;
-        if exgFlag == true
+        
+        % Options if EMG enabled
+        if emgFlag(5)
             shimmer5.setinternalboard('EMG');
             contents = cellstr(get(emgresolution_h,'String'));
             switch contents{get(emgresolution_h,'Value')}
                 case '16 BIT'
-                    if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                    if imuFlag(5)
+                        if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end,
+                        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            end
                         end
-                    elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    else
                         if pressureFlag
-                            shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
+                            shimmer5.setenabledsensors(macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
                         else
-                            shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG16BIT,1);
+                            shimmer5.setenabledsensors(macros.BATT,1,macros.EMG16BIT,1);
                         end
                     end
                 case '24 BIT (default)'
-                    if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                    if imuFlag(5)
+                        if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end,
+                        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
+                        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                            if pressureFlag
+                                shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            else
+                                shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            end
                         end
-                    elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    else
                         if pressureFlag
-                            shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
+                            shimmer5.setenabledsensors(macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
                         else
-                            shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
-                        end
-                    elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                        if pressureFlag
-                            shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1,macros.PRESSURE,1);
-                        else
-                            shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.EMG24BIT,1);
+                            shimmer5.setenabledsensors(macros.BATT,1,macros.EMG24BIT,1);
                         end
                     end
-                    shimmer5.setexggain(emg_gain,1,1);
-                    shimmer5.setexggain(emg_gain,1,2);
             end
-        elseif exgFlag==false
-            shimmer2.setinternalboard('None');
-            if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+            shimmer5.setexggain(emg_gain,1,1);
+            shimmer5.setexggain(emg_gain,1,2); 
+            
+        % Options if EMG disabled
+        elseif ~emgFlag(5)
+            shimmer5.setinternalboard('None');
+            if imuFlag(5)
+                if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer5.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
                 end
-            elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+            else
                 if pressureFlag
-                    shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    shimmer5.setenabledsensors(macros.BATT,1,macros.PRESSURE,1);
                 else
-                    shimmer5.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer5.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer5.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    shimmer5.setenabledsensors(macros.BATT,1);
                 end
             end
         end
@@ -816,82 +993,96 @@ if length(find(shimmersSelected))==connectCount
             shimmer5.setpressureresolution(pressure_resolution);
         end
         
-        switch get(sampratebool_h,'Value')
-            case 0
-                shimmer5.setaccelrate(accel_rate);
-                shimmer5.setgyrorate(gyro_rate);
-                shimmer5.setmagrate(mag_rate);
-                shimmer5.setexgrate(exg_rate,1);
-                shimmer5.setexgrate(exg_rate,2);
-            case 1
-                shimmer5.setsamplingrate(Fs);
+        shimmer5.setsamplingrate(Fs);
+        if imuFlag(5)
+            shimmer5.setaccelrate(accel_rate);
+            shimmer5.setgyrorate(gyro_rate);
+            shimmer5.setmagrate(mag_rate);
+            shimmer5.setaccelrange(accel_range);
+            shimmer5.setgyrorange(gyro_range);
+            shimmer5.setmagrange(mag_range);
         end
-        
-        shimmer5.setaccelrange(accel_range);
-        shimmer5.setgyrorange(gyro_range);
-        shimmer5.setmagrange(mag_range);
-        
+        if emgFlag(5)
+            shimmer5.setexgrate(exg_rate,1);
+            shimmer5.setexgrate(exg_rate,2);
+        end
+
     end
     
-    % Shimmer 6 (BTID 2BFD - GSR+ unit)
+    %% Shimmer 6 (BTID 2BFD - GSR+ unit)
     if shimmersSelected(6)
         shimmer6.setbaudrate(baud_rate);
         shimmer6.disableallsensors;
-        if gsrFlag == true
+        if gsrFlag
             shimmer6.setinternalboard('GSR');
-            if get(lownoise_h,'Value') && get(widerange_h,'Value')
+            if imuFlag(6)
+                if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
+                    else
+                        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.GSR,1);
+                    end
+                elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
+                    else
+                        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.GSR,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer6.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
+                    else
+                        shimmer6.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.GSR,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer6.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
+                    else
+                        shimmer6.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.GSR,1);
+                    end
+                end 
+            else
                 if pressureFlag
-                    shimmer6.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
+                    shimmer6.setenabledsensors(macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
                 else
-                    shimmer6.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.GSR,1);
-                end
-            elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
-                else
-                    shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.GSR,1);
-                end
-            elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer6.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
-                else
-                    shimmer6.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.GSR,1);
-                end
-            elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer6.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1,macros.GSR,1);
-                else
-                    shimmer6.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.GSR,1);
+                    shimmer6.setenabledsensors(macros.BATT,1,macros.GSR,1);
                 end
             end
-            
             shimmer6.setgsrrange(gsr_range);
             
-        elseif gsrFlag == false
+        elseif ~gsrFlag
             shimmer6.setinternalboard('None');
-            if get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer6.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer6.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+            if imuFlag(6)
+                if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer6.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer6.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
+                elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                    if pressureFlag
+                        shimmer6.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    else
+                        shimmer6.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    end
                 end
-            elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+            else
                 if pressureFlag
-                    shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                    shimmer6.setenabledsensors(macros.BATT,1,macros.PRESSURE);
                 else
-                    shimmer6.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer6.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer6.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-                end
-            elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-                if pressureFlag
-                    shimmer6.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-                else
-                    shimmer6.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                    shimmer6.setenabledsensors(macros.BATT);
                 end
             end
         end
@@ -900,68 +1091,74 @@ if length(find(shimmersSelected))==connectCount
             shimmer6.setpressureresolution(pressure_resolution);
         end
         
-        switch get(sampratebool_h,'Value')
-            case 0
-                shimmer6.setaccelrate(accel_rate);
-                shimmer6.setgyrorate(gyro_rate);
-                shimmer6.setmagrate(mag_rate);
-            case 1
-                shimmer6.setsamplingrate(Fs);
+        shimmer6.setsamplingrate(Fs);
+        if imuFlag(6)
+            shimmer6.setaccelrate(accel_rate);
+            shimmer6.setgyrorate(gyro_rate);
+            shimmer6.setmagrate(mag_rate);
+            shimmer6.setaccelrange(accel_range);
+            shimmer6.setgyrorange(gyro_range);
+            shimmer6.setmagrange(mag_range);
         end
-        
-        shimmer6.setaccelrange(accel_range);
-        shimmer6.setgyrorange(gyro_range);
-        shimmer6.setmagrange(mag_range);
         
     end
     
-    %  Shimmer 7 (BTID 38F5 - PROTO3 unit)
+    %% Shimmer 7 (BTID 38F5 - PROTO3 unit)
     if shimmersSelected(7)
         shimmer7.setbaudrate(baud_rate);
-        shimmer7.setinternalboard('None');
         shimmer7.disableallsensors;
         
-        if get(lownoise_h,'Value') && get(widerange_h,'Value')
-            if pressureFlag
-                shimmer7.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-            else
-                shimmer7.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+        shimmer7.setinternalboard('None');
+        if imuFlag(7)
+            if get(lownoise_h,'Value') && get(widerange_h,'Value')
+                if pressureFlag
+                    shimmer7.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                else
+                    shimmer7.setenabledsensors(macros.LNACCEL,1,macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                end
+            elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                if pressureFlag
+                    shimmer7.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                else
+                    shimmer7.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                end
+            elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
+                if pressureFlag
+                    shimmer7.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                else
+                    shimmer7.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                end
+            elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+                if pressureFlag
+                    shimmer7.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                else
+                    shimmer7.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                end
             end
-        elseif get(lownoise_h,'Value') && ~get(widerange_h,'Value')
+        else
             if pressureFlag
-                shimmer7.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
+                shimmer7.setenabledsensors(macros.BATT,1,macros.PRESSURE,1);
             else
-                shimmer7.setenabledsensors(macros.LNACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
+                shimmer7.setenabledsensors(macros.BATT,1);
             end
-        elseif ~get(lownoise_h,'Value') && get(widerange_h,'Value')
-            if pressureFlag
-                shimmer7.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-            else
-                shimmer7.setenabledsensors(macros.WRACCEL,1,macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-            end
-        elseif ~get(lownoise_h,'Value') && ~get(widerange_h,'Value')
-            if pressureFlag
-                shimmer7.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1,macros.PRESSURE,1);
-            else
-                shimmer7.setenabledsensors(macros.GYRO,1,macros.MAG,1,macros.BATT,1);
-            end
-        end
-               
-        switch get(sampratebool_h,'Value')
-            case 0
-                shimmer7.setaccelrate(accel_rate);
-                shimmer7.setgyrorate(gyro_rate);
-                shimmer7.setmagrate(mag_rate);
-            case 1
-                shimmer7.setsamplingrate(Fs);
         end
         
-        shimmer7.setaccelrange(accel_range);
-        shimmer7.setgyrorange(gyro_range);
-        shimmer7.setmagrange(mag_range);
+        if pressureFlag
+            shimmer7.setpressureresolution(pressure_resolution);
+        end
+        
+        shimmer7.setsamplingrate(Fs);
+        if imuFlag(7)
+            shimmer7.setaccelrate(accel_rate);
+            shimmer7.setgyrorate(gyro_rate);
+            shimmer7.setmagrate(mag_rate);
+            shimmer7.setaccelrange(accel_range);
+            shimmer7.setgyrorange(gyro_range);
+            shimmer7.setmagrange(mag_range);
+        end
     end
     
-    %% Data Collection
+    %% Start Trial
     
     disp('Release <Disconnect> button if necessary...')
     waitfor(disconnect_h,'Value',0)
@@ -1020,11 +1217,12 @@ if length(find(shimmersSelected))==connectCount
             
             firsttime=true;
             
+            %% Data Collection (Read/Plot/Write)
             while ~get(stop_h,'Value')
                 
                 pause(buffer)
                 
-                % Read in Shimmer 1 data and header files
+                %% Shimmer 1 (BTID 2BD1 - IMU unit)
                 if shimmersSelected(1)
                     [newDataShimmer1,signalNames,signalFormats,signalUnits]=shimmer1.getdata('c');
                     if ~isempty(newDataShimmer1)
@@ -1062,10 +1260,52 @@ if length(find(shimmersSelected))==connectCount
                         packetsReceivedShimmer1 = shimmer1.getpercentageofpacketsreceived(timeDataShimmer1);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer1 = (((mean(newDataShimmer1(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        
+                        % Plot Shimmer 1 data
+                        if plotFlag(1)
+                            figure(1)
+                            if length(dataShimmer1)<numSamples
+                                dataShimmer1 = dataShimmer1((length(dataShimmer1)-numSamples):end,end);
+                            end
+                            
+                            if ~isempty(dataShimmer1)
+                                if get(lownoise_h,'Value')
+                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                    subplot(2,2,1)
+                                    plot([dataShimmer1(:,lnaccelIndex(1)), dataShimmer1(:,lnaccelIndex(2)), dataShimmer1(:,lnaccelIndex(3))])
+                                    axis([0 numSamples -2 2])
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if get(widerange_h,'Value')
+                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                    subplot(2,2,2)
+                                    plot([dataShimmer1(:,wraccelIndex(1)), dataShimmer1(:,wraccelIndex(2)), dataShimmer1(:,wraccelIndex(3))])
+                                    axis(wraccelaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if imuFlag(1)
+                                    gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
+                                    subplot(2,2,3)
+                                    plot([dataShimmer1(:,gyroIndex(1)), dataShimmer1(:,gyroIndex(2)), dataShimmer1(:,gyroIndex(3))])
+                                    axis(gyroaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    
+                                    magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
+                                    subplot(2,2,4)
+                                    plot([dataShimmer1(:,magIndex(1)), dataShimmer1(:,magIndex(2)), dataShimmer1(:,lnaccelIndex(3))])
+                                    axis(magaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                            end
+                        end
+                        
+                        
                     end
-                end
+                    
+                    
+                end      
                 
-                % Read in Shimmer 2 data and header files
+                %% Shimmer 2 (BTID 3A45 - ExG unit)
                 if shimmersSelected(2)
                     [newDataShimmer2,signalNames,signalFormats,signalUnits]=shimmer2.getdata('c');
                     if ~isempty(newDataShimmer2)
@@ -1103,11 +1343,59 @@ if length(find(shimmersSelected))==connectCount
                         packetsReceivedShimmer2 = shimmer2.getpercentageofpacketsreceived(timeDataShimmer2);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer2 = (((mean(newDataShimmer2(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        
+                        % Plot Shimmer 2 data
+                        if plotFlag(2)
+                            figure(2)
+                            if length(dataShimmer2)<numSamples
+                                dataShimmer2 = dataShimmer2((length(dataShimmer2)-numSamples):end,end);
+                            end
+                            
+                            if ~isempty(dataShimmer2)
+                                if get(lownoise_h,'Value')
+                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                    subplot(2,3,1)
+                                    plot([dataShimmer2(:,lnaccelIndex(1)), dataShimmer2(:,lnaccelIndex(2)), dataShimmer2(:,lnaccelIndex(3))])
+                                    axis([0 numSamples -2 2])
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if get(widerange_h,'Value')
+                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                    subplot(2,3,2)
+                                    plot([dataShimmer2(:,wraccelIndex(1)), dataShimmer2(:,wraccelIndex(2)), dataShimmer2(:,wraccelIndex(3))])
+                                    axis(wraccelaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if imuFlag(2)
+                                    gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
+                                    subplot(2,3,4)
+                                    plot([dataShimmer2(:,gyroIndex(1)), dataShimmer2(:,gyroIndex(2)), dataShimmer2(:,gyroIndex(3))])
+                                    axis(gyroaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    
+                                    magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
+                                    subplot(2,3,5)
+                                    plot([dataShimmer2(:,magIndex(1)), dataShimmer2(:,magIndex(2)), dataShimmer2(:,lnaccelIndex(3))])
+                                    axis(magaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if emgFlag(2)
+                                    emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
+                                    subplot(2,3,3)
+                                    plot(dataShimmer2(:,emgIndex(1)))
+                                    axis([0 numSamples -5 5])
+                                    legend(char(signalNames{emgIndex(1)}))
+                                    subplot(2,3,6)
+                                    plot(dataShimmer2(:,emgIndex(2)))
+                                    axis([0 numSamples -5 5])
+                                    legend(char(signalNames{emgIndex(2)}))
+                                end
+                            end
+                        end
                     end
                 end
-                
-                
-                % Read in Shimmer 3 data and header files
+                               
+                %% Shimmer 3 (BTID 399C - ExG unit)
                 if shimmersSelected(3)
                     [newDataShimmer3,signalNames,signalFormats,signalUnits]=shimmer3.getdata('c');
                     if ~isempty(newDataShimmer3)
@@ -1136,7 +1424,7 @@ if length(find(shimmersSelected))==connectCount
                             fclose(fid);
                         end
                         
-                        dlmwrite([pathname trialname ' - ' sensorNames{1,3} '.txt'], newDataShimmer2, '-append', 'delimiter', '\t','precision',16);
+                        dlmwrite([pathname trialname ' - ' sensorNames{1,3} '.txt'], newDataShimmer3, '-append', 'delimiter', '\t','precision',16);
                         sensorFlag(3) = 1;
                         
                         dataShimmer3 = [dataShimmer3; newDataShimmer3];
@@ -1145,10 +1433,59 @@ if length(find(shimmersSelected))==connectCount
                         packetsReceivedShimmer3 = shimmer3.getpercentageofpacketsreceived(timeDataShimmer3);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer3 = (((mean(newDataShimmer3(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        
+                        % Plot Shimmer 3 data
+                        if plotFlag(3)
+                            figure(3)
+                            if length(dataShimmer3)<numSamples
+                                dataShimmer3 = dataShimmer3((length(dataShimmer3)-numSamples):end,end);
+                            end
+                            
+                            if ~isempty(dataShimmer3)
+                                if get(lownoise_h,'Value')
+                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                    subplot(2,3,1)
+                                    plot([dataShimmer3(:,lnaccelIndex(1)), dataShimmer3(:,lnaccelIndex(2)), dataShimmer3(:,lnaccelIndex(3))])
+                                    axis([0 numSamples -2 2])
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if get(widerange_h,'Value')
+                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                    subplot(2,3,2)
+                                    plot([dataShimmer3(:,wraccelIndex(1)), dataShimmer3(:,wraccelIndex(2)), dataShimmer3(:,wraccelIndex(3))])
+                                    axis(wraccelaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if imuFlag(3)
+                                    gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
+                                    subplot(2,3,4)
+                                    plot([dataShimmer3(:,gyroIndex(1)), dataShimmer3(:,gyroIndex(2)), dataShimmer3(:,gyroIndex(3))])
+                                    axis(gyroaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    
+                                    magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
+                                    subplot(2,3,5)
+                                    plot([dataShimmer3(:,magIndex(1)), dataShimmer3(:,magIndex(2)), dataShimmer3(:,lnaccelIndex(3))])
+                                    axis(magaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if emgFlag(3)
+                                    emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
+                                    subplot(2,3,3)
+                                    plot(dataShimmer3(:,emgIndex(1)))
+                                    axis([0 numSamples -5 5])
+                                    legend(char(signalNames{emgIndex(1)}))
+                                    subplot(2,3,6)
+                                    plot(dataShimmer3(:,emgIndex(2)))
+                                    axis([0 numSamples -5 5])
+                                    legend(char(signalNames{emgIndex(2)}))
+                                end
+                            end
+                        end
                     end
                 end
                 
-                % Read in Shimmer 4 data and header files
+                %% Shimmer 4 (BTID 3A1E - ExG unit)
                 if shimmersSelected(4)
                     [newDataShimmer4,signalNames,signalFormats,signalUnits]=shimmer4.getdata('c');
                     if ~isempty(newDataShimmer4)
@@ -1177,7 +1514,7 @@ if length(find(shimmersSelected))==connectCount
                             fclose(fid);
                         end
                         
-                        dlmwrite([pathname trialname ' - ' sensorNames{1,4} '.txt'], newDataShimmer2, '-append', 'delimiter', '\t','precision',16);
+                        dlmwrite([pathname trialname ' - ' sensorNames{1,4} '.txt'], newDataShimmer4, '-append', 'delimiter', '\t','precision',16);
                         sensorFlag(4) = 1;
                         
                         dataShimmer4 = [dataShimmer4; newDataShimmer4];
@@ -1186,10 +1523,59 @@ if length(find(shimmersSelected))==connectCount
                         packetsReceivedShimmer4 = shimmer4.getpercentageofpacketsreceived(timeDataShimmer4);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer4 = (((mean(newDataShimmer4(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        
+                         % Plot Shimmer 4 data
+                        if plotFlag(4)
+                            figure(4)
+                            if length(dataShimmer4)<numSamples
+                                dataShimmer4 = dataShimmer4((length(dataShimmer4)-numSamples):end,end);
+                            end
+                            
+                            if ~isempty(dataShimmer4)
+                                if get(lownoise_h,'Value')
+                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                    subplot(2,3,1)
+                                    plot([dataShimmer4(:,lnaccelIndex(1)), dataShimmer4(:,lnaccelIndex(2)), dataShimmer4(:,lnaccelIndex(3))])
+                                    axis([0 numSamples -2 2])
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if get(widerange_h,'Value')
+                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                    subplot(2,3,2)
+                                    plot([dataShimmer4(:,wraccelIndex(1)), dataShimmer4(:,wraccelIndex(2)), dataShimmer4(:,wraccelIndex(3))])
+                                    axis(wraccelaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if imuFlag(4)
+                                    gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
+                                    subplot(2,3,4)
+                                    plot([dataShimmer4(:,gyroIndex(1)), dataShimmer4(:,gyroIndex(2)), dataShimmer4(:,gyroIndex(3))])
+                                    axis(gyroaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    
+                                    magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
+                                    subplot(2,3,5)
+                                    plot([dataShimmer4(:,magIndex(1)), dataShimmer4(:,magIndex(2)), dataShimmer4(:,lnaccelIndex(3))])
+                                    axis(magaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if emgFlag(4)
+                                    emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
+                                    subplot(2,3,3)
+                                    plot(dataShimmer4(:,emgIndex(1)))
+                                    axis([0 numSamples -5 5])
+                                    legend(char(signalNames{emgIndex(1)}))
+                                    subplot(2,3,6)
+                                    plot(dataShimmer4(:,emgIndex(2)))
+                                    axis([0 numSamples -5 5])
+                                    legend(char(signalNames{emgIndex(2)}))
+                                end
+                            end
+                        end
                     end
                 end
                 
-                % Read in Shimmer 5 data and header files
+                %% Shimmer 5 (BTID 39F8 - ExG unit)
                 if shimmersSelected(5)
                     [newDataShimmer5,signalNames,signalFormats,signalUnits]=shimmer5.getdata('c');
                     if ~isempty(newDataShimmer5)
@@ -1227,10 +1613,60 @@ if length(find(shimmersSelected))==connectCount
                         packetsReceivedShimmer5 = shimmer5.getpercentageofpacketsreceived(timeDataShimmer5);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer5 = (((mean(newDataShimmer5(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        
+                        % Plot Shimmer 5 data
+                        if plotFlag(5)
+                            figure(5)
+                            if length(dataShimmer5)<numSamples
+                                dataShimmer5 = dataShimmer5((length(dataShimmer5)-numSamples):end,end);
+                            end
+                            
+                            if ~isempty(dataShimmer5)
+                                if get(lownoise_h,'Value')
+                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                    subplot(2,3,1)
+                                    plot([dataShimmer5(:,lnaccelIndex(1)), dataShimmer5(:,lnaccelIndex(2)), dataShimmer5(:,lnaccelIndex(3))])
+                                    axis([0 numSamples -2 2])
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if get(widerange_h,'Value')
+                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                    subplot(2,3,2)
+                                    plot([dataShimmer5(:,wraccelIndex(1)), dataShimmer5(:,wraccelIndex(2)), dataShimmer5(:,wraccelIndex(3))])
+                                    axis(wraccelaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if imuFlag(5)
+                                    gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
+                                    subplot(2,3,4)
+                                    plot([dataShimmer5(:,gyroIndex(1)), dataShimmer5(:,gyroIndex(2)), dataShimmer5(:,gyroIndex(3))])
+                                    axis(gyroaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    
+                                    magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
+                                    subplot(2,3,5)
+                                    plot([dataShimmer5(:,magIndex(1)), dataShimmer5(:,magIndex(2)), dataShimmer5(:,lnaccelIndex(3))])
+                                    axis(magaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if emgFlag(5)
+                                    emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
+                                    subplot(2,3,3)
+                                    plot(dataShimmer5(:,emgIndex(1)))
+                                    axis([0 numSamples -5 5])
+                                    legend(char(signalNames{emgIndex(1)}))
+                                    subplot(2,3,6)
+                                    plot(dataShimmer5(:,emgIndex(2)))
+                                    axis([0 numSamples -5 5])
+                                    legend(char(signalNames{emgIndex(2)}))
+                                end
+                            end
+                        end
+                        
                     end
                 end
                 
-                % Read in Shimmer 6 data and header files
+                %% Shimmer 6 (BTID 2BFD - GSR+ unit)
                 if shimmersSelected(6)
                     [newDataShimmer6,signalNames,signalFormats,signalUnits]=shimmer6.getdata('c');
                     if ~isempty(newDataShimmer6)
@@ -1268,10 +1704,56 @@ if length(find(shimmersSelected))==connectCount
                         packetsReceivedShimmer6 = shimmer6.getpercentageofpacketsreceived(timeDataShimmer6);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer6 = (((mean(newDataShimmer6(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        
+                        % Plot Shimmer 6 data
+                        if plotFlag(6)
+                            figure(6)
+                            if length(dataShimmer6)<numSamples
+                                dataShimmer6 = dataShimmer6((length(dataShimmer6)-numSamples):end,end);
+                            end
+                            
+                            if ~isempty(dataShimmer6)
+                                if get(lownoise_h,'Value')
+                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                    subplot(2,3,1)
+                                    plot([dataShimmer6(:,lnaccelIndex(1)), dataShimmer6(:,lnaccelIndex(2)), dataShimmer6(:,lnaccelIndex(3))])
+                                    axis([0 numSamples -2 2])
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if get(widerange_h,'Value')
+                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                    subplot(2,3,2)
+                                    plot([dataShimmer6(:,wraccelIndex(1)), dataShimmer6(:,wraccelIndex(2)), dataShimmer6(:,wraccelIndex(3))])
+                                    axis(wraccelaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if imuFlag(6)
+                                    gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
+                                    subplot(2,3,4)
+                                    plot([dataShimmer6(:,gyroIndex(1)), dataShimmer6(:,gyroIndex(2)), dataShimmer6(:,gyroIndex(3))])
+                                    axis(gyroaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    
+                                    magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
+                                    subplot(2,3,5)
+                                    plot([dataShimmer6(:,magIndex(1)), dataShimmer6(:,magIndex(2)), dataShimmer6(:,lnaccelIndex(3))])
+                                    axis(magaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if gsrFlag
+                                    gsrIndex = [find(ismember(signalNames, 'GSR'))]; 
+                                    subplot(2,3,3)
+                                    plot([dataShimmer6(:,gsrIndex(1))])
+                                    axis(gyroaxis)
+                                    legend(char(signalNames{gsrIndex(1)}))
+                                end
+                            end
+                        end
+                        
                     end
                 end
                 
-                % Read in Shimmer 2 data and header files
+                %% Shimmer 7 (BTID 38F5 - PROTO3 unit)
                 if shimmersSelected(7)
                     [newDataShimmer7,signalNames,signalFormats,signalUnits]=shimmer7.getdata('c');
                     if ~isempty(newDataShimmer7)
@@ -1309,9 +1791,49 @@ if length(find(shimmersSelected))==connectCount
                         packetsReceivedShimmer7 = shimmer7.getpercentageofpacketsreceived(timeDataShimmer7);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
                         battShimmer7 = (((mean(newDataShimmer7(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        
+                        % Plot Shimmer 7 data
+                        if plotFlag(7)
+                            figure(7)
+                            if length(dataShimmer7)<numSamples
+                                dataShimmer7 = dataShimmer7((length(dataShimmer7)-numSamples):end,end);
+                            end
+                            
+                            if ~isempty(dataShimmer7)
+                                if get(lownoise_h,'Value')
+                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                    subplot(2,2,1)
+                                    plot([dataShimmer7(:,lnaccelIndex(1)), dataShimmer7(:,lnaccelIndex(2)), dataShimmer7(:,lnaccelIndex(3))])
+                                    axis([0 numSamples -2 2])
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if get(widerange_h,'Value')
+                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                    subplot(2,2,2)
+                                    plot([dataShimmer7(:,wraccelIndex(1)), dataShimmer7(:,wraccelIndex(2)), dataShimmer7(:,wraccelIndex(3))])
+                                    axis(wraccelaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                                if imuFlag(7)
+                                    gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
+                                    subplot(2,2,3)
+                                    plot([dataShimmer7(:,gyroIndex(1)), dataShimmer7(:,gyroIndex(2)), dataShimmer7(:,gyroIndex(3))])
+                                    axis(gyroaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    
+                                    magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
+                                    subplot(2,2,4)
+                                    plot([dataShimmer7(:,magIndex(1)), dataShimmer7(:,magIndex(2)), dataShimmer7(:,lnaccelIndex(3))])
+                                    axis(magaxis)
+                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                end
+                            end
+                        end
+                        
                     end
                 end
                 
+                %% Update GUI
                 tabledata = [packetsReceivedShimmer1 battShimmer1; packetsReceivedShimmer2 battShimmer2; packetsReceivedShimmer3 battShimmer3; packetsReceivedShimmer4 battShimmer4; packetsReceivedShimmer5 battShimmer5; packetsReceivedShimmer6 battShimmer6; packetsReceivedShimmer7 battShimmer7];
                 set(table1_h,'Data',tabledata)
                 
@@ -1375,6 +1897,18 @@ if length(find(shimmersSelected))==connectCount
     set(enable39F8_h,'Enable','on')
     set(enable2BFD_h,'Enable','on')
     set(enable38F5_h,'Enable','on')
+    set(emg2_h,'Enable','on')
+    set(emg3_h,'Enable','on')
+    set(emg4_h,'Enable','on')
+    set(emg5_h,'Enable','on')
+    set(imu1_h,'Enable','on')
+    set(imu2_h,'Enable','on')
+    set(imu3_h,'Enable','on')
+    set(imu4_h,'Enable','on')
+    set(imu5_h,'Enable','on')
+    set(imu6_h,'Enable','on')
+    set(imu7_h,'Enable','on')
+    set(gsr_h,'Enable','on')
     
     if (shimmersSelected(1)), shimmer1.disconnect; end;
     if (shimmersSelected(2)), shimmer2.disconnect; end;
