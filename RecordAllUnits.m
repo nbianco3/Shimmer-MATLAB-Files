@@ -1,4 +1,4 @@
-function RecordAllUnits(trialname)
+function RecordAllUnits
 clc; beep off;
 
 % Define handles
@@ -53,12 +53,15 @@ plot5_h = handles.plot5;
 plot6_h = handles.plot6;
 plot7_h = handles.plot7;
 table1_h = handles.uitable1;
+window_h = handles.window;
+trialname_h = handles.trialname;
+
+% Get trialname
+trialname = get(trialname_h,'String');
 
 sensorFlag = [0 0 0 0 0 0 0];
 
 pathname = 'C:\Users\Nick\Documents\Parkinson Mobility Study\Shimmer MATLAB Files\Shimmer-MATLAB-Files\Trials\';
-
-disp('All')
 
 buffer = 1; % seconds
 
@@ -76,10 +79,14 @@ sensorNames = {'Unit2BD1','Unit3A45','Unit399C','Unit3A1E','Unit39F8','Unit2BFD'
 
 %% Set sensor parameters
 disp('Select sensor options, then press <Set Parameters>...')
+windisplay = {'Select sensor options, then press <Set Parameters>...'};
+win=1;
+set(window_h,'Data',windisplay)
 waitfor(params_h,'Value',1)
 
 % Get enabled EMG sensor flags
 emgFlag = [0 get(emg2_h,'Value') get(emg3_h,'Value') get(emg4_h,'Value') get(emg5_h,'Value') 0 0];
+buffer=max(size(find(emgFlag)))*0.5;
 
 % Get enabled IMU sensor flags
 imuFlag = [get(imu1_h,'Value') get(imu2_h,'Value') get(imu3_h,'Value') get(imu4_h,'Value') get(imu5_h,'Value') get(imu6_h,'Value') get(imu7_h,'Value')];
@@ -136,20 +143,41 @@ set(gsrrange_h,'Enable','off')
 
 % General sampling rate (Hz)
 if get(sampratebool_h,'Value')
-    Fs = str2double(get(samprate_h,'String'));
-    numSamples = floor(Fs*2);
+    Fs = str2double(get(samprate_h,'String'))*ones(1,7);
+    numSamples = floor(Fs(1)*2)*ones(1,7);
 else
     if any(emgFlag)
-        set(samprate_h,'String','1200')
-        Fs = str2double(get(samprate_h,'String'));
-        numSamples = 2500;
+        Fs = 64*ones(1,7);
+        numSamples = 250*ones(1,7);
+        if emgFlag(2)
+            Fs(2)=1200;
+            numSamples(2)=2500;
+        end
+        if emgFlag(3)
+            Fs(3)=1200;
+            numSamples(3)=2500;
+        end
+        if emgFlag(4)
+            Fs(4)=1200;
+            numSamples(4)=2500;
+        end
+        if emgFlag(5)
+            Fs(5)=1200;
+            numSamples(5)=2500;
+        end  
+        if any(imuFlag)
+            set(samprate_h,'String','64+1200')
+        else
+            set(samprate_h,'String','1200')
+        end
     else
+        Fs = 64*ones(1,7);
+        numSamples = 250*ones(1,7);
         set(samprate_h,'String','64')
-        Fs = str2double(get(samprate_h,'String'));
-        numSamples = 250;
     end
 end
 set(samprate_h,'Enable','off')
+set(sampratebool_h,'Enable','off')
 
 % Wide Range Acclerometer range (±g)
 contents = cellstr(get(accelrange_h,'String'));
@@ -368,9 +396,26 @@ set(imu6_h,'Enable','off')
 set(imu7_h,'Enable','off')
 set(gsr_h,'Enable','off')
 
+set(plot1_h,'Enable','off')
+set(plot2_h,'Enable','off')
+set(plot3_h,'Enable','off')
+set(plot4_h,'Enable','off')
+set(plot5_h,'Enable','off')
+set(plot6_h,'Enable','off')
+set(plot7_h,'Enable','off')
+
 set(params_h,'Enable','off')
 
 %% Connect Shimmers
+disp('Connecting Shimmers (may take a few minutes)...')
+win=win+1;
+newrow = {'Connecting Shimmers (may take a few minutes)...'};
+windisplay = vertcat(newrow,windisplay);
+if win>13
+    windisplay{win}=[];
+end
+set(window_h,'Data',windisplay)
+
 shimmersSelected = zeros(1,7);
 if get(enable2BD1_h,'Value'), shimmersSelected(1)=true; end
 if get(enable3A45_h,'Value'), shimmersSelected(2)=true; end
@@ -437,7 +482,7 @@ if length(find(shimmersSelected))==connectCount
             shimmer1.setpressureresolution(pressure_resolution);
         end
         
-        shimmer1.setsamplingrate(Fs);
+        shimmer1.setsamplingrate(Fs(1));
         if imuFlag(1)
             shimmer1.setaccelrate(accel_rate);
             shimmer1.setgyrorate(gyro_rate);
@@ -446,6 +491,13 @@ if length(find(shimmersSelected))==connectCount
             shimmer1.setgyrorange(gyro_range);
             shimmer1.setmagrange(mag_range);
         end
+        win=win+1;
+        newrow = {'Unit 2BD1 parameters set.'};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
+        end
+        set(window_h,'Data',windisplay)
     end
     
     %% Shimmer 2 (BTID 3A45 - ExG unit)
@@ -572,7 +624,7 @@ if length(find(shimmersSelected))==connectCount
             shimmer2.setpressureresolution(pressure_resolution);
         end
         
-        shimmer2.setsamplingrate(Fs);
+        shimmer2.setsamplingrate(Fs(2));
         if imuFlag(2)
             shimmer2.setaccelrate(accel_rate);
             shimmer2.setgyrorate(gyro_rate);
@@ -585,7 +637,13 @@ if length(find(shimmersSelected))==connectCount
             shimmer2.setexgrate(exg_rate,1);
             shimmer2.setexgrate(exg_rate,2);
         end
-        
+        win=win+1;
+        newrow = {'Unit 3A45 parameters set.'};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
+        end
+        set(window_h,'Data',windisplay)
         
     end
     
@@ -713,7 +771,7 @@ if length(find(shimmersSelected))==connectCount
             shimmer3.setpressureresolution(pressure_resolution);
         end
         
-        shimmer3.setsamplingrate(Fs);
+        shimmer3.setsamplingrate(Fs(3));
         if imuFlag(3)
             shimmer3.setaccelrate(accel_rate);
             shimmer3.setgyrorate(gyro_rate);
@@ -725,8 +783,14 @@ if length(find(shimmersSelected))==connectCount
         if emgFlag(3)
             shimmer3.setexgrate(exg_rate,1);
             shimmer3.setexgrate(exg_rate,2);
+        end       
+        win=win+1;
+        newrow = {'Unit 399C parameters set.'};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
         end
-
+        set(window_h,'Data',windisplay)
     end
     
     %% Shimmer 4 (BTID 3A1E - ExG unit)
@@ -853,7 +917,7 @@ if length(find(shimmersSelected))==connectCount
             shimmer4.setpressureresolution(pressure_resolution);
         end
         
-        shimmer4.setsamplingrate(Fs);
+        shimmer4.setsamplingrate(Fs(4));
         if imuFlag(4)
             shimmer4.setaccelrate(accel_rate);
             shimmer4.setgyrorate(gyro_rate);
@@ -866,7 +930,13 @@ if length(find(shimmersSelected))==connectCount
             shimmer4.setexgrate(exg_rate,1);
             shimmer4.setexgrate(exg_rate,2);
         end
-
+        win=win+1;
+        newrow = {'Unit 3A1E parameters set.'};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
+        end
+        set(window_h,'Data',windisplay)
     end
     
     %% Shimmer 5 (BTID 39F8 - ExG unit)
@@ -993,7 +1063,7 @@ if length(find(shimmersSelected))==connectCount
             shimmer5.setpressureresolution(pressure_resolution);
         end
         
-        shimmer5.setsamplingrate(Fs);
+        shimmer5.setsamplingrate(Fs(5));
         if imuFlag(5)
             shimmer5.setaccelrate(accel_rate);
             shimmer5.setgyrorate(gyro_rate);
@@ -1006,7 +1076,13 @@ if length(find(shimmersSelected))==connectCount
             shimmer5.setexgrate(exg_rate,1);
             shimmer5.setexgrate(exg_rate,2);
         end
-
+        win=win+1;
+        newrow = {'Unit 39F8 parameters set.'};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
+        end
+        set(window_h,'Data',windisplay)
     end
     
     %% Shimmer 6 (BTID 2BFD - GSR+ unit)
@@ -1091,7 +1167,7 @@ if length(find(shimmersSelected))==connectCount
             shimmer6.setpressureresolution(pressure_resolution);
         end
         
-        shimmer6.setsamplingrate(Fs);
+        shimmer6.setsamplingrate(Fs(6));
         if imuFlag(6)
             shimmer6.setaccelrate(accel_rate);
             shimmer6.setgyrorate(gyro_rate);
@@ -1100,7 +1176,13 @@ if length(find(shimmersSelected))==connectCount
             shimmer6.setgyrorange(gyro_range);
             shimmer6.setmagrange(mag_range);
         end
-        
+        win=win+1;
+        newrow = {'Unit 2BFD parameters set.'};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
+        end
+        set(window_h,'Data',windisplay)
     end
     
     %% Shimmer 7 (BTID 38F5 - PROTO3 unit)
@@ -1147,7 +1229,7 @@ if length(find(shimmersSelected))==connectCount
             shimmer7.setpressureresolution(pressure_resolution);
         end
         
-        shimmer7.setsamplingrate(Fs);
+        shimmer7.setsamplingrate(Fs(7));
         if imuFlag(7)
             shimmer7.setaccelrate(accel_rate);
             shimmer7.setgyrorate(gyro_rate);
@@ -1156,22 +1238,59 @@ if length(find(shimmersSelected))==connectCount
             shimmer7.setgyrorange(gyro_range);
             shimmer7.setmagrange(mag_range);
         end
+        win=win+1;
+        newrow = {'Unit 38F5 parameters set.'};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
+        end
+        set(window_h,'Data',windisplay)
     end
     
     %% Start Trial
     
     disp('Release <Disconnect> button if necessary...')
+    win=win+1;
+    newrow = {'Release <Disconnect> button if necessary...'};
+    windisplay = vertcat(newrow,windisplay);
+    if win>13
+        windisplay{win}=[];
+    end
+    set(window_h,'Data',windisplay)
     waitfor(disconnect_h,'Value',0)
     
     while ~get(disconnect_h,'Value')
         
         disp('Release <Stop> button if necessary...')
+        win=win+1;
+        newrow = {'Release <Stop> button if necessary...'};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
+        end
+        set(window_h,'Data',windisplay)
         waitfor(stop_h,'Value',0)
-        disp('Press <Start> to begin recording trial...')
+        
+        disp(['Press <Start> to begin recording ' trialname ' ...'])
+        win=win+1;
+        newrow = {['Press <Start> to begin recording ' trialname ' ...']};
+        windisplay = vertcat(newrow,windisplay);
+        if win>13
+            windisplay{win}=[];
+        end
+        set(window_h,'Data',windisplay)
         waitfor(start_h,'Value',1)
         
         if get(disconnect_h,'Value')
             disp('Disconnecting...')
+            win=win+1;
+            newrow = {'Disconnecting...'};
+            windisplay = vertcat(newrow,windisplay);
+            if win>13
+                windisplay{win}=[];
+            end
+            set(window_h,'Data',windisplay)
+            waitfor(start_h,'Value',1)
             break;
         end
         
@@ -1199,6 +1318,14 @@ if length(find(shimmersSelected))==connectCount
             dataShimmer6 = [];
             dataShimmer7 = [];
             
+            plotDataShimmer1 = [];
+            plotDataShimmer2 = [];
+            plotDataShimmer3 = [];
+            plotDataShimmer4 = [];
+            plotDataShimmer5 = [];
+            plotDataShimmer6 = [];
+            plotDataShimmer7 = [];
+            
             packetsReceivedShimmer1 = 0;
             packetsReceivedShimmer2 = 0;
             packetsReceivedShimmer3 = 0;
@@ -1219,6 +1346,33 @@ if length(find(shimmersSelected))==connectCount
             
             %% Data Collection (Read/Plot/Write)
             while ~get(stop_h,'Value')
+                
+                set(enable2BD1_h,'Enable','off')
+                set(enable3A45_h,'Enable','off')
+                set(enable399C_h,'Enable','off')
+                set(enable3A1E_h,'Enable','off')
+                set(enable39F8_h,'Enable','off')
+                set(enable2BFD_h,'Enable','off')
+                set(enable38F5_h,'Enable','off')
+                set(emg2_h,'Enable','off')
+                set(emg3_h,'Enable','off')
+                set(emg4_h,'Enable','off')
+                set(emg5_h,'Enable','off')
+                set(imu1_h,'Enable','off')
+                set(imu2_h,'Enable','off')
+                set(imu3_h,'Enable','off')
+                set(imu4_h,'Enable','off')
+                set(imu5_h,'Enable','off')
+                set(imu6_h,'Enable','off')
+                set(imu7_h,'Enable','off')
+                set(gsr_h,'Enable','off')
+                set(plot1_h,'Enable','off')
+                set(plot2_h,'Enable','off')
+                set(plot3_h,'Enable','off')
+                set(plot4_h,'Enable','off')
+                set(plot5_h,'Enable','off')
+                set(plot6_h,'Enable','off')
+                set(plot7_h,'Enable','off')
                 
                 pause(buffer)
                 
@@ -1255,6 +1409,7 @@ if length(find(shimmersSelected))==connectCount
                         sensorFlag(1) = 1;
                         
                         dataShimmer1 = [dataShimmer1; newDataShimmer1];
+                        plotDataShimmer1 = [plotDataShimmer1; newDataShimmer1];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
                         timeDataShimmer1 = dataShimmer1(:,timeIndex);
                         packetsReceivedShimmer1 = shimmer1.getpercentageofpacketsreceived(timeDataShimmer1);
@@ -1264,37 +1419,37 @@ if length(find(shimmersSelected))==connectCount
                         % Plot Shimmer 1 data
                         if plotFlag(1)
                             figure(1)
-                            if length(dataShimmer1)<numSamples
-                                dataShimmer1 = dataShimmer1((length(dataShimmer1)-numSamples):end,end);
+                            if length(plotDataShimmer1)>numSamples(1)
+                                plotDataShimmer1 = plotDataShimmer1((length(plotDataShimmer1)-numSamples(1)):end,:);
                             end
                             
-                            if ~isempty(dataShimmer1)
+                            if ~isempty(plotDataShimmer1)
                                 if get(lownoise_h,'Value')
                                     lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
                                     subplot(2,2,1)
-                                    plot([dataShimmer1(:,lnaccelIndex(1)), dataShimmer1(:,lnaccelIndex(2)), dataShimmer1(:,lnaccelIndex(3))])
-                                    axis([0 numSamples -2 2])
+                                    plot([plotDataShimmer1(:,lnaccelIndex(1)), plotDataShimmer1(:,lnaccelIndex(2)), plotDataShimmer1(:,lnaccelIndex(3))])
+                                    axis([0 numSamples(1) -2 2])
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                 end
                                 if get(widerange_h,'Value')
                                     wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
                                     subplot(2,2,2)
-                                    plot([dataShimmer1(:,wraccelIndex(1)), dataShimmer1(:,wraccelIndex(2)), dataShimmer1(:,wraccelIndex(3))])
+                                    plot([plotDataShimmer1(:,wraccelIndex(1)), plotDataShimmer1(:,wraccelIndex(2)), plotDataShimmer1(:,wraccelIndex(3))])
                                     axis(wraccelaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
                                 end
                                 if imuFlag(1)
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,2,3)
-                                    plot([dataShimmer1(:,gyroIndex(1)), dataShimmer1(:,gyroIndex(2)), dataShimmer1(:,gyroIndex(3))])
+                                    plot([plotDataShimmer1(:,gyroIndex(1)), plotDataShimmer1(:,gyroIndex(2)), plotDataShimmer1(:,gyroIndex(3))])
                                     axis(gyroaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,2,4)
-                                    plot([dataShimmer1(:,magIndex(1)), dataShimmer1(:,magIndex(2)), dataShimmer1(:,lnaccelIndex(3))])
+                                    plot([plotDataShimmer1(:,magIndex(1)), plotDataShimmer1(:,magIndex(2)), plotDataShimmer1(:,magIndex(3))])
                                     axis(magaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                             end
                         end
@@ -1338,6 +1493,7 @@ if length(find(shimmersSelected))==connectCount
                         sensorFlag(2) = 1;
                         
                         dataShimmer2 = [dataShimmer2; newDataShimmer2];
+                        plotDataShimmer2 = [plotDataShimmer2; newDataShimmer2];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
                         timeDataShimmer2 = dataShimmer2(:,timeIndex);
                         packetsReceivedShimmer2 = shimmer2.getpercentageofpacketsreceived(timeDataShimmer2);
@@ -1347,47 +1503,47 @@ if length(find(shimmersSelected))==connectCount
                         % Plot Shimmer 2 data
                         if plotFlag(2)
                             figure(2)
-                            if length(dataShimmer2)<numSamples
-                                dataShimmer2 = dataShimmer2((length(dataShimmer2)-numSamples):end,end);
+                            if length(plotDataShimmer2)>numSamples(2)
+                                plotDataShimmer2 = plotDataShimmer2((length(plotDataShimmer2)-numSamples(2)):end,:);
                             end
                             
-                            if ~isempty(dataShimmer2)
+                            if ~isempty(plotDataShimmer2)
                                 if get(lownoise_h,'Value')
                                     lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
-                                    subplot(2,3,1)
-                                    plot([dataShimmer2(:,lnaccelIndex(1)), dataShimmer2(:,lnaccelIndex(2)), dataShimmer2(:,lnaccelIndex(3))])
-                                    axis([0 numSamples -2 2])
+                                    subplot(2,3,1)                               
+                                    plot([plotDataShimmer2(:,lnaccelIndex(1)), plotDataShimmer2(:,lnaccelIndex(2)), plotDataShimmer2(:,lnaccelIndex(3))])
+                                    axis([0 numSamples(2) -2 2])
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                 end
                                 if get(widerange_h,'Value')
                                     wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
                                     subplot(2,3,2)
-                                    plot([dataShimmer2(:,wraccelIndex(1)), dataShimmer2(:,wraccelIndex(2)), dataShimmer2(:,wraccelIndex(3))])
+                                    plot([plotDataShimmer2(:,wraccelIndex(1)), plotDataShimmer2(:,wraccelIndex(2)), plotDataShimmer2(:,wraccelIndex(3))])
                                     axis(wraccelaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
                                 end
                                 if imuFlag(2)
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,3,4)
-                                    plot([dataShimmer2(:,gyroIndex(1)), dataShimmer2(:,gyroIndex(2)), dataShimmer2(:,gyroIndex(3))])
+                                    plot([plotDataShimmer2(:,gyroIndex(1)), plotDataShimmer2(:,gyroIndex(2)), plotDataShimmer2(:,gyroIndex(3))])
                                     axis(gyroaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,3,5)
-                                    plot([dataShimmer2(:,magIndex(1)), dataShimmer2(:,magIndex(2)), dataShimmer2(:,lnaccelIndex(3))])
+                                    plot([plotDataShimmer2(:,magIndex(1)), plotDataShimmer2(:,magIndex(2)), plotDataShimmer2(:,magIndex(3))])
                                     axis(magaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if emgFlag(2)
                                     emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
                                     subplot(2,3,3)
-                                    plot(dataShimmer2(:,emgIndex(1)))
-                                    axis([0 numSamples -5 5])
+                                    plot(plotDataShimmer2(:,emgIndex(1)))
+                                    axis([0 numSamples(2) -5 5])
                                     legend(char(signalNames{emgIndex(1)}))
                                     subplot(2,3,6)
-                                    plot(dataShimmer2(:,emgIndex(2)))
-                                    axis([0 numSamples -5 5])
+                                    plot(plotDataShimmer2(:,emgIndex(2)))
+                                    axis([0 numSamples(2) -5 5])
                                     legend(char(signalNames{emgIndex(2)}))
                                 end
                             end
@@ -1428,6 +1584,7 @@ if length(find(shimmersSelected))==connectCount
                         sensorFlag(3) = 1;
                         
                         dataShimmer3 = [dataShimmer3; newDataShimmer3];
+                        plotDataShimmer3 = [plotDataShimmer3; newDataShimmer3];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
                         timeDataShimmer3 = dataShimmer3(:,timeIndex);
                         packetsReceivedShimmer3 = shimmer3.getpercentageofpacketsreceived(timeDataShimmer3);
@@ -1437,47 +1594,47 @@ if length(find(shimmersSelected))==connectCount
                         % Plot Shimmer 3 data
                         if plotFlag(3)
                             figure(3)
-                            if length(dataShimmer3)<numSamples
-                                dataShimmer3 = dataShimmer3((length(dataShimmer3)-numSamples):end,end);
+                            if length(plotDataShimmer3)>numSamples(3)
+                                plotDataShimmer3 = plotDataShimmer3((length(plotDataShimmer3)-numSamples(3)):end,:);
                             end
                             
-                            if ~isempty(dataShimmer3)
+                            if ~isempty(plotDataShimmer3)
                                 if get(lownoise_h,'Value')
                                     lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
                                     subplot(2,3,1)
-                                    plot([dataShimmer3(:,lnaccelIndex(1)), dataShimmer3(:,lnaccelIndex(2)), dataShimmer3(:,lnaccelIndex(3))])
-                                    axis([0 numSamples -2 2])
+                                    plot([plotDataShimmer3(:,lnaccelIndex(1)), plotDataShimmer3(:,lnaccelIndex(2)), plotDataShimmer3(:,lnaccelIndex(3))])
+                                    axis([0 numSamples(3) -2 2])
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                 end
                                 if get(widerange_h,'Value')
                                     wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
                                     subplot(2,3,2)
-                                    plot([dataShimmer3(:,wraccelIndex(1)), dataShimmer3(:,wraccelIndex(2)), dataShimmer3(:,wraccelIndex(3))])
+                                    plot([plotDataShimmer3(:,wraccelIndex(1)), plotDataShimmer3(:,wraccelIndex(2)), plotDataShimmer3(:,wraccelIndex(3))])
                                     axis(wraccelaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
                                 end
                                 if imuFlag(3)
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,3,4)
-                                    plot([dataShimmer3(:,gyroIndex(1)), dataShimmer3(:,gyroIndex(2)), dataShimmer3(:,gyroIndex(3))])
+                                    plot([plotDataShimmer3(:,gyroIndex(1)), plotDataShimmer3(:,gyroIndex(2)), plotDataShimmer3(:,gyroIndex(3))])
                                     axis(gyroaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,3,5)
-                                    plot([dataShimmer3(:,magIndex(1)), dataShimmer3(:,magIndex(2)), dataShimmer3(:,lnaccelIndex(3))])
+                                    plot([plotDataShimmer3(:,magIndex(1)), plotDataShimmer3(:,magIndex(2)), plotDataShimmer3(:,magIndex(3))])
                                     axis(magaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if emgFlag(3)
                                     emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
                                     subplot(2,3,3)
-                                    plot(dataShimmer3(:,emgIndex(1)))
-                                    axis([0 numSamples -5 5])
+                                    plot(plotDataShimmer3(:,emgIndex(1)))
+                                    axis([0 numSamples(3) -5 5])
                                     legend(char(signalNames{emgIndex(1)}))
                                     subplot(2,3,6)
-                                    plot(dataShimmer3(:,emgIndex(2)))
-                                    axis([0 numSamples -5 5])
+                                    plot(plotDataShimmer3(:,emgIndex(2)))
+                                    axis([0 numSamples(3) -5 5])
                                     legend(char(signalNames{emgIndex(2)}))
                                 end
                             end
@@ -1518,6 +1675,7 @@ if length(find(shimmersSelected))==connectCount
                         sensorFlag(4) = 1;
                         
                         dataShimmer4 = [dataShimmer4; newDataShimmer4];
+                        plotDataShimmer4 = [plotDataShimmer4; newDataShimmer4];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
                         timeDataShimmer4 = dataShimmer4(:,timeIndex);
                         packetsReceivedShimmer4 = shimmer4.getpercentageofpacketsreceived(timeDataShimmer4);
@@ -1527,47 +1685,47 @@ if length(find(shimmersSelected))==connectCount
                          % Plot Shimmer 4 data
                         if plotFlag(4)
                             figure(4)
-                            if length(dataShimmer4)<numSamples
-                                dataShimmer4 = dataShimmer4((length(dataShimmer4)-numSamples):end,end);
+                            if length(plotDataShimmer4)>numSamples(4)
+                                plotDataShimmer4 = plotDataShimmer4((length(plotDataShimmer4)-numSamples(4)):end,:);
                             end
                             
-                            if ~isempty(dataShimmer4)
+                            if ~isempty(plotDataShimmer4)
                                 if get(lownoise_h,'Value')
                                     lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
                                     subplot(2,3,1)
-                                    plot([dataShimmer4(:,lnaccelIndex(1)), dataShimmer4(:,lnaccelIndex(2)), dataShimmer4(:,lnaccelIndex(3))])
-                                    axis([0 numSamples -2 2])
+                                    plot([plotDataShimmer4(:,lnaccelIndex(1)), plotDataShimmer4(:,lnaccelIndex(2)), plotDataShimmer4(:,lnaccelIndex(3))])
+                                    axis([0 numSamples(4) -2 2])
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                 end
                                 if get(widerange_h,'Value')
                                     wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
                                     subplot(2,3,2)
-                                    plot([dataShimmer4(:,wraccelIndex(1)), dataShimmer4(:,wraccelIndex(2)), dataShimmer4(:,wraccelIndex(3))])
+                                    plot([plotDataShimmer4(:,wraccelIndex(1)), plotDataShimmer4(:,wraccelIndex(2)), plotDataShimmer4(:,wraccelIndex(3))])
                                     axis(wraccelaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
                                 end
                                 if imuFlag(4)
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,3,4)
-                                    plot([dataShimmer4(:,gyroIndex(1)), dataShimmer4(:,gyroIndex(2)), dataShimmer4(:,gyroIndex(3))])
+                                    plot([plotDataShimmer4(:,gyroIndex(1)), plotDataShimmer4(:,gyroIndex(2)), plotDataShimmer4(:,gyroIndex(3))])
                                     axis(gyroaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,3,5)
-                                    plot([dataShimmer4(:,magIndex(1)), dataShimmer4(:,magIndex(2)), dataShimmer4(:,lnaccelIndex(3))])
+                                    plot([plotDataShimmer4(:,magIndex(1)), plotDataShimmer4(:,magIndex(2)), plotDataShimmer4(:,magIndex(3))])
                                     axis(magaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if emgFlag(4)
                                     emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
                                     subplot(2,3,3)
-                                    plot(dataShimmer4(:,emgIndex(1)))
-                                    axis([0 numSamples -5 5])
+                                    plot(plotDataShimmer4(:,emgIndex(1)))
+                                    axis([0 numSamples(4) -5 5])
                                     legend(char(signalNames{emgIndex(1)}))
                                     subplot(2,3,6)
-                                    plot(dataShimmer4(:,emgIndex(2)))
-                                    axis([0 numSamples -5 5])
+                                    plot(plotDataShimmer4(:,emgIndex(2)))
+                                    axis([0 numSamples(4) -5 5])
                                     legend(char(signalNames{emgIndex(2)}))
                                 end
                             end
@@ -1608,6 +1766,7 @@ if length(find(shimmersSelected))==connectCount
                         sensorFlag(5) = 1;
                         
                         dataShimmer5 = [dataShimmer5; newDataShimmer5];
+                        plotDataShimmer5 = [plotDataShimmer5; newDataShimmer5];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
                         timeDataShimmer5 = dataShimmer5(:,timeIndex);
                         packetsReceivedShimmer5 = shimmer5.getpercentageofpacketsreceived(timeDataShimmer5);
@@ -1617,47 +1776,47 @@ if length(find(shimmersSelected))==connectCount
                         % Plot Shimmer 5 data
                         if plotFlag(5)
                             figure(5)
-                            if length(dataShimmer5)<numSamples
-                                dataShimmer5 = dataShimmer5((length(dataShimmer5)-numSamples):end,end);
+                            if length(plotDataShimmer5)>numSamples(5)
+                                plotDataShimmer5 = plotDataShimmer5((length(plotDataShimmer5)-numSamples(5)):end,:);
                             end
                             
-                            if ~isempty(dataShimmer5)
+                            if ~isempty(plotDataShimmer5)
                                 if get(lownoise_h,'Value')
                                     lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
                                     subplot(2,3,1)
-                                    plot([dataShimmer5(:,lnaccelIndex(1)), dataShimmer5(:,lnaccelIndex(2)), dataShimmer5(:,lnaccelIndex(3))])
-                                    axis([0 numSamples -2 2])
+                                    plot([plotDataShimmer5(:,lnaccelIndex(1)), plotDataShimmer5(:,lnaccelIndex(2)), plotDataShimmer5(:,lnaccelIndex(3))])
+                                    axis([0 numSamples(5) -2 2])
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                 end
                                 if get(widerange_h,'Value')
                                     wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
                                     subplot(2,3,2)
-                                    plot([dataShimmer5(:,wraccelIndex(1)), dataShimmer5(:,wraccelIndex(2)), dataShimmer5(:,wraccelIndex(3))])
+                                    plot([plotDataShimmer5(:,wraccelIndex(1)), plotDataShimmer5(:,wraccelIndex(2)), plotDataShimmer5(:,wraccelIndex(3))])
                                     axis(wraccelaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
                                 end
                                 if imuFlag(5)
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,3,4)
-                                    plot([dataShimmer5(:,gyroIndex(1)), dataShimmer5(:,gyroIndex(2)), dataShimmer5(:,gyroIndex(3))])
+                                    plot([plotDataShimmer5(:,gyroIndex(1)), plotDataShimmer5(:,gyroIndex(2)), plotDataShimmer5(:,gyroIndex(3))])
                                     axis(gyroaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,3,5)
-                                    plot([dataShimmer5(:,magIndex(1)), dataShimmer5(:,magIndex(2)), dataShimmer5(:,lnaccelIndex(3))])
+                                    plot([plotDataShimmer5(:,magIndex(1)), plotDataShimmer5(:,magIndex(2)), plotDataShimmer5(:,magIndex(3))])
                                     axis(magaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if emgFlag(5)
                                     emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
                                     subplot(2,3,3)
-                                    plot(dataShimmer5(:,emgIndex(1)))
-                                    axis([0 numSamples -5 5])
+                                    plot(plotDataShimmer5(:,emgIndex(1)))
+                                    axis([0 numSamples(5) -5 5])
                                     legend(char(signalNames{emgIndex(1)}))
                                     subplot(2,3,6)
-                                    plot(dataShimmer5(:,emgIndex(2)))
-                                    axis([0 numSamples -5 5])
+                                    plot(plotDataShimmer5(:,emgIndex(2)))
+                                    axis([0 numSamples(5) -5 5])
                                     legend(char(signalNames{emgIndex(2)}))
                                 end
                             end
@@ -1699,6 +1858,7 @@ if length(find(shimmersSelected))==connectCount
                         sensorFlag(6) = 1;
                         
                         dataShimmer6 = [dataShimmer6; newDataShimmer6];
+                        plotDataShimmer6 = [plotDataShimmer6; newDataShimmer6];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
                         timeDataShimmer6 = dataShimmer6(:,timeIndex);
                         packetsReceivedShimmer6 = shimmer6.getpercentageofpacketsreceived(timeDataShimmer6);
@@ -1708,42 +1868,42 @@ if length(find(shimmersSelected))==connectCount
                         % Plot Shimmer 6 data
                         if plotFlag(6)
                             figure(6)
-                            if length(dataShimmer6)<numSamples
-                                dataShimmer6 = dataShimmer6((length(dataShimmer6)-numSamples):end,end);
+                            if length(plotDataShimmer6)>numSamples(6)
+                                plotDataShimmer6 = plotDataShimmer6((length(plotDataShimmer6)-numSamples(6)):end,:);
                             end
                             
-                            if ~isempty(dataShimmer6)
+                            if ~isempty(plotDataShimmer6)
                                 if get(lownoise_h,'Value')
                                     lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
                                     subplot(2,3,1)
-                                    plot([dataShimmer6(:,lnaccelIndex(1)), dataShimmer6(:,lnaccelIndex(2)), dataShimmer6(:,lnaccelIndex(3))])
-                                    axis([0 numSamples -2 2])
+                                    plot([plotDataShimmer6(:,lnaccelIndex(1)), plotDataShimmer6(:,lnaccelIndex(2)), plotDataShimmer6(:,lnaccelIndex(3))])
+                                    axis([0 numSamples(6) -2 2])
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                 end
                                 if get(widerange_h,'Value')
                                     wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
                                     subplot(2,3,2)
-                                    plot([dataShimmer6(:,wraccelIndex(1)), dataShimmer6(:,wraccelIndex(2)), dataShimmer6(:,wraccelIndex(3))])
+                                    plot([plotDataShimmer6(:,wraccelIndex(1)), plotDataShimmer6(:,wraccelIndex(2)), plotDataShimmer6(:,wraccelIndex(3))])
                                     axis(wraccelaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
                                 end
                                 if imuFlag(6)
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,3,4)
-                                    plot([dataShimmer6(:,gyroIndex(1)), dataShimmer6(:,gyroIndex(2)), dataShimmer6(:,gyroIndex(3))])
+                                    plot([plotDataShimmer6(:,gyroIndex(1)), plotDataShimmer6(:,gyroIndex(2)), plotDataShimmer6(:,gyroIndex(3))])
                                     axis(gyroaxis)
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,3,5)
-                                    plot([dataShimmer6(:,magIndex(1)), dataShimmer6(:,magIndex(2)), dataShimmer6(:,lnaccelIndex(3))])
+                                    plot([plotDataShimmer6(:,magIndex(1)), plotDataShimmer6(:,magIndex(2)), plotDataShimmer6(:,magIndex(3))])
                                     axis(magaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if gsrFlag
                                     gsrIndex = [find(ismember(signalNames, 'GSR'))]; 
                                     subplot(2,3,3)
-                                    plot([dataShimmer6(:,gsrIndex(1))])
+                                    plot([plotDataShimmer6(:,gsrIndex(1))])
                                     axis(gyroaxis)
                                     legend(char(signalNames{gsrIndex(1)}))
                                 end
@@ -1786,6 +1946,7 @@ if length(find(shimmersSelected))==connectCount
                         sensorFlag(7) = 1;
                         
                         dataShimmer7 = [dataShimmer7; newDataShimmer7];
+                        plotDataShimmer7 = [plotDataShimmer7; newDataShimmer7];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
                         timeDataShimmer7 = dataShimmer7(:,timeIndex);
                         packetsReceivedShimmer7 = shimmer7.getpercentageofpacketsreceived(timeDataShimmer7);
@@ -1795,37 +1956,37 @@ if length(find(shimmersSelected))==connectCount
                         % Plot Shimmer 7 data
                         if plotFlag(7)
                             figure(7)
-                            if length(dataShimmer7)<numSamples
-                                dataShimmer7 = dataShimmer7((length(dataShimmer7)-numSamples):end,end);
+                            if length(plotDataShimmer7)>numSamples(7)
+                                plotDataShimmer7 = plotDataShimmer7((length(plotDataShimmer7)-numSamples(7)):end,:);
                             end
                             
-                            if ~isempty(dataShimmer7)
+                            if ~isempty(plotDataShimmer7)
                                 if get(lownoise_h,'Value')
                                     lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
                                     subplot(2,2,1)
-                                    plot([dataShimmer7(:,lnaccelIndex(1)), dataShimmer7(:,lnaccelIndex(2)), dataShimmer7(:,lnaccelIndex(3))])
-                                    axis([0 numSamples -2 2])
+                                    plot([plotDataShimmer7(:,lnaccelIndex(1)), plotDataShimmer7(:,lnaccelIndex(2)), plotDataShimmer7(:,lnaccelIndex(3))])
+                                    axis([0 numSamples(7) -2 2])
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                 end
                                 if get(widerange_h,'Value')
                                     wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
                                     subplot(2,2,2)
-                                    plot([dataShimmer7(:,wraccelIndex(1)), dataShimmer7(:,wraccelIndex(2)), dataShimmer7(:,wraccelIndex(3))])
+                                    plot([plotDataShimmer7(:,wraccelIndex(1)), plotDataShimmer7(:,wraccelIndex(2)), plotDataShimmer7(:,wraccelIndex(3))])
                                     axis(wraccelaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
                                 end
                                 if imuFlag(7)
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,2,3)
-                                    plot([dataShimmer7(:,gyroIndex(1)), dataShimmer7(:,gyroIndex(2)), dataShimmer7(:,gyroIndex(3))])
+                                    plot([plotDataShimmer7(:,gyroIndex(1)), plotDataShimmer7(:,gyroIndex(2)), plotDataShimmer7(:,gyroIndex(3))])
                                     axis(gyroaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,2,4)
-                                    plot([dataShimmer7(:,magIndex(1)), dataShimmer7(:,magIndex(2)), dataShimmer7(:,lnaccelIndex(3))])
+                                    plot([plotDataShimmer7(:,magIndex(1)), plotDataShimmer7(:,magIndex(2)), plotDataShimmer7(:,magIndex(3))])
                                     axis(magaxis)
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                             end
                         end
@@ -1858,6 +2019,33 @@ if length(find(shimmersSelected))==connectCount
             
             SortShimmerDataAPI(trialname,sensorFlag)
             
+            set(enable2BD1_h,'Enable','on')
+            set(enable3A45_h,'Enable','on')
+            set(enable399C_h,'Enable','on')
+            set(enable3A1E_h,'Enable','on')
+            set(enable39F8_h,'Enable','on')
+            set(enable2BFD_h,'Enable','on')
+            set(enable38F5_h,'Enable','on')
+            set(emg2_h,'Enable','on')
+            set(emg3_h,'Enable','on')
+            set(emg4_h,'Enable','on')
+            set(emg5_h,'Enable','on')
+            set(imu1_h,'Enable','on')
+            set(imu2_h,'Enable','on')
+            set(imu3_h,'Enable','on')
+            set(imu4_h,'Enable','on')
+            set(imu5_h,'Enable','on')
+            set(imu6_h,'Enable','on')
+            set(imu7_h,'Enable','on')
+            set(gsr_h,'Enable','on')
+            set(plot1_h,'Enable','on')
+            set(plot2_h,'Enable','on')
+            set(plot3_h,'Enable','on')
+            set(plot4_h,'Enable','on')
+            set(plot5_h,'Enable','on')
+            set(plot6_h,'Enable','on')
+            set(plot7_h,'Enable','on')
+            
         else
             if (shimmersSelected(1)), shimmer1.stop; end;
             if (shimmersSelected(2)), shimmer2.stop; end;
@@ -1866,6 +2054,33 @@ if length(find(shimmersSelected))==connectCount
             if (shimmersSelected(5)), shimmer5.stop; end;
             if (shimmersSelected(6)), shimmer6.stop; end;
             if (shimmersSelected(7)), shimmer7.stop; end;
+            
+            set(enable2BD1_h,'Enable','on')
+            set(enable3A45_h,'Enable','on')
+            set(enable399C_h,'Enable','on')
+            set(enable3A1E_h,'Enable','on')
+            set(enable39F8_h,'Enable','on')
+            set(enable2BFD_h,'Enable','on')
+            set(enable38F5_h,'Enable','on')
+            set(emg2_h,'Enable','on')
+            set(emg3_h,'Enable','on')
+            set(emg4_h,'Enable','on')
+            set(emg5_h,'Enable','on')
+            set(imu1_h,'Enable','on')
+            set(imu2_h,'Enable','on')
+            set(imu3_h,'Enable','on')
+            set(imu4_h,'Enable','on')
+            set(imu5_h,'Enable','on')
+            set(imu6_h,'Enable','on')
+            set(imu7_h,'Enable','on')
+            set(gsr_h,'Enable','on')
+            set(plot1_h,'Enable','on')
+            set(plot2_h,'Enable','on')
+            set(plot3_h,'Enable','on')
+            set(plot4_h,'Enable','on')
+            set(plot5_h,'Enable','on')
+            set(plot6_h,'Enable','on')
+            set(plot7_h,'Enable','on')
         end
         
     end
@@ -1890,25 +2105,7 @@ if length(find(shimmersSelected))==connectCount
     set(pressure_h,'Enable','on')
     set(pressureresolution_h,'Enable','on')
     set(params_h,'Enable','on')
-    set(enable2BD1_h,'Enable','on')
-    set(enable3A45_h,'Enable','on')
-    set(enable399C_h,'Enable','on')
-    set(enable3A1E_h,'Enable','on')
-    set(enable39F8_h,'Enable','on')
-    set(enable2BFD_h,'Enable','on')
-    set(enable38F5_h,'Enable','on')
-    set(emg2_h,'Enable','on')
-    set(emg3_h,'Enable','on')
-    set(emg4_h,'Enable','on')
-    set(emg5_h,'Enable','on')
-    set(imu1_h,'Enable','on')
-    set(imu2_h,'Enable','on')
-    set(imu3_h,'Enable','on')
-    set(imu4_h,'Enable','on')
-    set(imu5_h,'Enable','on')
-    set(imu6_h,'Enable','on')
-    set(imu7_h,'Enable','on')
-    set(gsr_h,'Enable','on')
+   
     
     if (shimmersSelected(1)), shimmer1.disconnect; end;
     if (shimmersSelected(2)), shimmer2.disconnect; end;
