@@ -39,6 +39,8 @@ for i=1:numSensors
     end
 end
 
+handles = guihandles(gcbo);
+
 start_h = handles.startbutton;
 stop_h = handles.stopbutton;
 disconnect_h = handles.disconnectbutton;

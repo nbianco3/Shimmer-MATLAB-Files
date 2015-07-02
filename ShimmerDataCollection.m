@@ -206,9 +206,17 @@ function connectbutton_Callback(hObject, eventdata, handles)
     set(emg4_h,'Value',0)
     set(emg5_h,'Value',0)
     set(gsr_h,'Value',0)
+    set(plot1_h,'Value',0)
+    set(plot2_h,'Value',0)
+    set(plot3_h,'Value',0)
+    set(plot4_h,'Value',0)
+    set(plot5_h,'Value',0)
+    set(plot6_h,'Value',0)
+    set(plot7_h,'Value',0)
     
-    switch get(modes_h,'Value')
-        case 1 % IMU
+    contents = cellstr(get(modes_h,'String'));
+    switch contents{get(modes_h,'Value')}
+        case 'IMU'
             set(enable2BD1_h,'Value',1)
             set(enable3A45_h,'Value',1)
             set(enable399C_h,'Value',1)
@@ -223,7 +231,7 @@ function connectbutton_Callback(hObject, eventdata, handles)
             set(imu5_h,'Value',1)
             set(imu6_h,'Value',1)
             set(imu7_h,'Value',1)
-        case 2 % EMG
+        case 'EMG'
             set(enable3A45_h,'Value',1)
             set(enable399C_h,'Value',1)
             set(enable3A1E_h,'Value',1)
@@ -232,10 +240,10 @@ function connectbutton_Callback(hObject, eventdata, handles)
             set(emg3_h,'Value',1)
             set(emg4_h,'Value',1)
             set(emg5_h,'Value',1)
-        case 3 % GSR
+        case 'GSR'
             set(enable2BFD_h,'Value',1)
             set(gsr_h,'Value',1)
-        case 4 % IMU+GSR
+        case 'IMU+GSR'
             set(enable2BD1_h,'Value',1)
             set(enable3A45_h,'Value',1)
             set(enable399C_h,'Value',1)
@@ -251,7 +259,7 @@ function connectbutton_Callback(hObject, eventdata, handles)
             set(imu6_h,'Value',1)
             set(imu7_h,'Value',1)
             set(gsr_h,'Value',1)
-        case 5 % IMU+EMG
+        case 'IMU+EMG'
             set(enable2BD1_h,'Value',1)
             set(enable3A45_h,'Value',1)
             set(enable399C_h,'Value',1)
@@ -270,7 +278,7 @@ function connectbutton_Callback(hObject, eventdata, handles)
             set(emg3_h,'Value',1)
             set(emg4_h,'Value',1)
             set(emg5_h,'Value',1)
-        case 6 % EMG+GSR
+        case 'EMG+GSR'
             set(enable3A45_h,'Value',1)
             set(enable399C_h,'Value',1)
             set(enable3A1E_h,'Value',1)
@@ -281,7 +289,7 @@ function connectbutton_Callback(hObject, eventdata, handles)
             set(emg5_h,'Value',1)        
             set(enable2BFD_h,'Value',1)
             set(gsr_h,'Value',1)
-        case 7 % IMU+EMG+GSR
+        case 'IMU+EMG+GSR'
             set(enable2BD1_h,'Value',1)
             set(enable3A45_h,'Value',1)
             set(enable399C_h,'Value',1)
@@ -301,15 +309,12 @@ function connectbutton_Callback(hObject, eventdata, handles)
             set(emg4_h,'Value',1)
             set(emg5_h,'Value',1)
             set(gsr_h,'Value',1)
+        case '399C'
+            set(enable399C_h,'Value',1)
+            set(imu3_h,'Value',1)
+            set(emg3_h,'Value',1)
+            set(plot3_h,'Value',1)
     end  
-    
-    set(plot1_h,'Value',0)
-    set(plot2_h,'Value',0)
-    set(plot3_h,'Value',0)
-    set(plot4_h,'Value',0)
-    set(plot5_h,'Value',0)
-    set(plot6_h,'Value',0)
-    set(plot7_h,'Value',0)
     
     % Enable sensor parameters if disabled
     set(emgrate_h,'Enable','on')
@@ -350,9 +355,16 @@ function connectbutton_Callback(hObject, eventdata, handles)
     set(imu6_h,'Enable','on')
     set(imu7_h,'Enable','on')
     set(gsr_h,'Enable','on')
+    set(plot1_h,'Enable','on')
+    set(plot2_h,'Enable','on')
+    set(plot3_h,'Enable','on')
+    set(plot4_h,'Enable','on')
+    set(plot5_h,'Enable','on')
+    set(plot6_h,'Enable','on')
+    set(plot7_h,'Enable','on')
     
     % Execute data collection
-    RecordAllUnits(trialname)
+    RecordAllUnits
   
 % Disconnect Shimmers
 function disconnectbutton_Callback(hObject, eventdata, handles)

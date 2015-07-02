@@ -1,6 +1,9 @@
 function RecordAllUnits
 clc; beep off;
 
+% Define physical variables
+g = 9.81;
+
 % Define handles
 handles = guihandles(gcbo);
     
@@ -86,7 +89,7 @@ waitfor(params_h,'Value',1)
 
 % Get enabled EMG sensor flags
 emgFlag = [0 get(emg2_h,'Value') get(emg3_h,'Value') get(emg4_h,'Value') get(emg5_h,'Value') 0 0];
-buffer=max(size(find(emgFlag)))*0.5;
+%buffer=max(size(find(emgFlag)));
 
 % Get enabled IMU sensor flags
 imuFlag = [get(imu1_h,'Value') get(imu2_h,'Value') get(imu3_h,'Value') get(imu4_h,'Value') get(imu5_h,'Value') get(imu6_h,'Value') get(imu7_h,'Value')];
@@ -148,27 +151,27 @@ if get(sampratebool_h,'Value')
 else
     if any(emgFlag)
         Fs = 64*ones(1,7);
-        numSamples = 250*ones(1,7);
+        numSamples = 500*ones(1,7);
         if emgFlag(2)
-            Fs(2)=1200;
+            Fs(2)=1024;
             numSamples(2)=2500;
         end
         if emgFlag(3)
-            Fs(3)=1200;
+            Fs(3)=1024;
             numSamples(3)=2500;
         end
         if emgFlag(4)
-            Fs(4)=1200;
+            Fs(4)=1024;
             numSamples(4)=2500;
         end
         if emgFlag(5)
-            Fs(5)=1200;
+            Fs(5)=1024;
             numSamples(5)=2500;
         end  
         if any(imuFlag)
-            set(samprate_h,'String','64+1200')
+            set(samprate_h,'String','64+1024')
         else
-            set(samprate_h,'String','1200')
+            set(samprate_h,'String','1024')
         end
     else
         Fs = 64*ones(1,7);
@@ -184,16 +187,16 @@ contents = cellstr(get(accelrange_h,'String'));
 switch contents{get(accelrange_h,'Value')}
     case '2 (default)'
         accel_range = 0;
-        wraccelaxis = [0 numSamples -2 2];
+        wr_axisrange = 2*g;
     case '4'
         accel_range = 1;
-        wraccelaxis = [0 numSamples -4 4];
+        wr_axisrange = 4*g;
     case '8'
         accel_range = 2;
-        wraccelaxis = [0 numSamples -8 8];
+        wr_axisrange = 8*g;
     case '16'
         accel_range = 3;
-        wraccelaxis = [0 numSamples -16 16];
+        wr_axisrange = 16*g;
 end
 set(accelrange_h,'Enable','off')
 
@@ -202,16 +205,16 @@ contents = cellstr(get(gyrorange_h,'String'));
 switch contents{get(gyrorange_h,'Value')}
     case '250'
         gyro_range = 0;
-        gyroaxis = [0 numSamples -250 250];
+        gyro_axisrange = 250;
     case '500 (default)'
         gyro_range = 1;
-        gyroaxis = [0 numSamples -500 500];
+        gyro_axisrange = 500;
     case '1000'
         gyro_range = 2;
-        gyroaxis = [0 numSamples -1000 1000];
+        gyro_axisrange = 1000;
     case '2000'
         gyro_range = 3;
-        gyroaxis = [0 numSamples -2000 2000];
+        gyro_axisrange = 2000;
 end
 set(gyrorange_h,'Enable','off')
 
@@ -220,25 +223,25 @@ contents = cellstr(get(magrange_h,'String'));
 switch contents{get(magrange_h,'Value')}
     case '1.3 (default)'
         mag_range = 1;
-        magaxis = [0 numSamples -1.3 1.3];
+        mag_axisrange = 1.3;
     case '1.9'
         mag_range = 2;
-        magaxis = [0 numSamples -1.9 1.9];
+        mag_axisrange = 1.9;
     case '2.5' 
         mag_range = 3;
-        magaxis = [0 numSamples -2.5 2.5];
+        mag_axisrange = 2.5;
     case '4.0'
         mag_range = 4;
-        magaxis = [0 numSamples -4.0 4.0];
+        mag_axisrange = 4.0;
     case '4.7'
         mag_range = 5;
-        magaxis = [0 numSamples -4.7 4.7];
+        mag_axisrange = 4.7;
     case '5.6'
         mag_range = 6;
-        magaxis = [0 numSamples -5.6 5.6];
+        mag_axisrange = 5.6;
     case '8.1'
         mag_range = 7;
-        magaxis = [0 numSamples -8.1 8.1];
+        mag_axisrange = 8.1;
 end
 set(magrange_h,'Enable','off')
 
@@ -1295,13 +1298,13 @@ if length(find(shimmersSelected))==connectCount
         end
         
         startCount=0;
-        if (shimmersSelected(1)), if shimmer1.start, startCount=startCount+1; end; end;
-        if (shimmersSelected(2)), if shimmer2.start, startCount=startCount+1; end; end;
-        if (shimmersSelected(3)), if shimmer3.start, startCount=startCount+1; end; end;
-        if (shimmersSelected(4)), if shimmer4.start, startCount=startCount+1; end; end;
-        if (shimmersSelected(5)), if shimmer5.start, startCount=startCount+1; end; end;
-        if (shimmersSelected(6)), if shimmer6.start, startCount=startCount+1; end; end;
-        if (shimmersSelected(7)), if shimmer7.start, startCount=startCount+1; end; end;
+        if (shimmersSelected(1)), if shimmer1.startdatalogandstream, startCount=startCount+1; end; end;
+        if (shimmersSelected(2)), if shimmer2.startdatalogandstream, startCount=startCount+1; end; end;
+        if (shimmersSelected(3)), if shimmer3.startdatalogandstream, startCount=startCount+1; end; end;
+        if (shimmersSelected(4)), if shimmer4.startdatalogandstream, startCount=startCount+1; end; end;
+        if (shimmersSelected(5)), if shimmer5.startdatalogandstream, startCount=startCount+1; end; end;
+        if (shimmersSelected(6)), if shimmer6.startdatalogandstream, startCount=startCount+1; end; end;
+        if (shimmersSelected(7)), if shimmer7.startdatalogandstream, startCount=startCount+1; end; end;
         
         if length(find(shimmersSelected))==startCount
             
@@ -1343,6 +1346,13 @@ if length(find(shimmersSelected))==connectCount
             battShimmer7 = 0;
             
             firsttime=true;
+            firsttime1=true;
+            firsttime2=true;
+            firsttime3=true;
+            firsttime4=true;
+            firsttime5=true;
+            firsttime6=true;
+            firsttime7=true;
             
             %% Data Collection (Read/Plot/Write)
             while ~get(stop_h,'Value')
@@ -1424,33 +1434,36 @@ if length(find(shimmersSelected))==connectCount
                             end
                             
                             if ~isempty(plotDataShimmer1)
-                                if get(lownoise_h,'Value')
-                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
-                                    subplot(2,2,1)
-                                    plot([plotDataShimmer1(:,lnaccelIndex(1)), plotDataShimmer1(:,lnaccelIndex(2)), plotDataShimmer1(:,lnaccelIndex(3))])
-                                    axis([0 numSamples(1) -2 2])
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
-                                end
-                                if get(widerange_h,'Value')
-                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
-                                    subplot(2,2,2)
-                                    plot([plotDataShimmer1(:,wraccelIndex(1)), plotDataShimmer1(:,wraccelIndex(2)), plotDataShimmer1(:,wraccelIndex(3))])
-                                    axis(wraccelaxis)
-                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
-                                end
                                 if imuFlag(1)
+                                    if get(lownoise_h,'Value')
+                                        lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                        subplot(2,2,1)
+                                        plot([plotDataShimmer1(:,lnaccelIndex(1)), plotDataShimmer1(:,lnaccelIndex(2)), plotDataShimmer1(:,lnaccelIndex(3))])
+                                        axis([0 numSamples(1) -2 2])
+                                        legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    end
+                                    if get(widerange_h,'Value')
+                                        wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                        subplot(2,2,2)
+                                        plot([plotDataShimmer1(:,wraccelIndex(1)), plotDataShimmer1(:,wraccelIndex(2)), plotDataShimmer1(:,wraccelIndex(3))])
+                                        axis([0 numSamples(1) -wr_axisrange wr_axisrange])
+                                        legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
+                                    end
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,2,3)
                                     plot([plotDataShimmer1(:,gyroIndex(1)), plotDataShimmer1(:,gyroIndex(2)), plotDataShimmer1(:,gyroIndex(3))])
-                                    axis(gyroaxis)
+                                    axis([0 numSamples(1) -gyro_axisrange gyro_axisrange])
                                     legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,2,4)
                                     plot([plotDataShimmer1(:,magIndex(1)), plotDataShimmer1(:,magIndex(2)), plotDataShimmer1(:,magIndex(3))])
-                                    axis(magaxis)
+                                    axis([0 numSamples(1) -mag_axisrange mag_axisrange])
                                     legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
+                            end
+                            if firsttime1
+                                figtitle('Shimmer 1 - BTID 2BD1')
                             end
                         end
                         
@@ -1508,44 +1521,49 @@ if length(find(shimmersSelected))==connectCount
                             end
                             
                             if ~isempty(plotDataShimmer2)
-                                if get(lownoise_h,'Value')
-                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
-                                    subplot(2,3,1)                               
-                                    plot([plotDataShimmer2(:,lnaccelIndex(1)), plotDataShimmer2(:,lnaccelIndex(2)), plotDataShimmer2(:,lnaccelIndex(3))])
-                                    axis([0 numSamples(2) -2 2])
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
-                                end
-                                if get(widerange_h,'Value')
-                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
-                                    subplot(2,3,2)
-                                    plot([plotDataShimmer2(:,wraccelIndex(1)), plotDataShimmer2(:,wraccelIndex(2)), plotDataShimmer2(:,wraccelIndex(3))])
-                                    axis(wraccelaxis)
-                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
-                                end
                                 if imuFlag(2)
+                                    if get(lownoise_h,'Value')
+                                        lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                        subplot(2,2,1)
+                                        plot([plotDataShimmer2(:,lnaccelIndex(1)), plotDataShimmer2(:,lnaccelIndex(2)), plotDataShimmer2(:,lnaccelIndex(3))])
+                                        axis([0 numSamples(2) -2 2])
+                                        legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    end
+                                    if get(widerange_h,'Value')
+                                        wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                        subplot(2,2,2)
+                                        plot([plotDataShimmer2(:,wraccelIndex(1)), plotDataShimmer2(:,wraccelIndex(2)), plotDataShimmer2(:,wraccelIndex(3))])
+                                        axis([0 numSamples(2) -wr_axisrange wr_axisrange])
+                                        legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
+                                    end
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
-                                    subplot(2,3,4)
+                                    subplot(2,2,3)
                                     plot([plotDataShimmer2(:,gyroIndex(1)), plotDataShimmer2(:,gyroIndex(2)), plotDataShimmer2(:,gyroIndex(3))])
-                                    axis(gyroaxis)
+                                    axis([0 numSamples(2) -gyro_axisrange gyro_axisrange])
                                     legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
-                                    subplot(2,3,5)
+                                    subplot(2,2,4)
                                     plot([plotDataShimmer2(:,magIndex(1)), plotDataShimmer2(:,magIndex(2)), plotDataShimmer2(:,magIndex(3))])
-                                    axis(magaxis)
+                                    axis([0 numSamples(2) -mag_axisrange mag_axisrange])
                                     legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if emgFlag(2)
                                     emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
-                                    subplot(2,3,3)
-                                    plot(plotDataShimmer2(:,emgIndex(1)))
+                                    subplot(2,1,1)                                    
+                                    temptime = timeDataShimmer2(2:end);
+                                    TV = (temptime-temptime(1))/1000;
+                                    plot(butterfilt(plotDataShimmer2(:,emgIndex(1)),'bandpass',[10 400],4,TV))
                                     axis([0 numSamples(2) -5 5])
                                     legend(char(signalNames{emgIndex(1)}))
-                                    subplot(2,3,6)
-                                    plot(plotDataShimmer2(:,emgIndex(2)))
+                                    subplot(2,1,2)
+                                    plot(butterfilt(plotDataShimmer2(:,emgIndex(2)),'bandpass',[10 400],4,TV))
                                     axis([0 numSamples(2) -5 5])
                                     legend(char(signalNames{emgIndex(2)}))
                                 end
+                            end
+                            if firsttime2
+                                figtitle('Shimmer 2 - BTID 3A45')
                             end
                         end
                     end
@@ -1599,44 +1617,49 @@ if length(find(shimmersSelected))==connectCount
                             end
                             
                             if ~isempty(plotDataShimmer3)
-                                if get(lownoise_h,'Value')
-                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
-                                    subplot(2,3,1)
-                                    plot([plotDataShimmer3(:,lnaccelIndex(1)), plotDataShimmer3(:,lnaccelIndex(2)), plotDataShimmer3(:,lnaccelIndex(3))])
-                                    axis([0 numSamples(3) -2 2])
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
-                                end
-                                if get(widerange_h,'Value')
-                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
-                                    subplot(2,3,2)
-                                    plot([plotDataShimmer3(:,wraccelIndex(1)), plotDataShimmer3(:,wraccelIndex(2)), plotDataShimmer3(:,wraccelIndex(3))])
-                                    axis(wraccelaxis)
-                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
-                                end
                                 if imuFlag(3)
+                                    if get(lownoise_h,'Value')
+                                        lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                        subplot(2,2,1)
+                                        plot([plotDataShimmer3(:,lnaccelIndex(1)), plotDataShimmer3(:,lnaccelIndex(2)), plotDataShimmer3(:,lnaccelIndex(3))])
+                                        axis([0 numSamples(3) -2 2])
+                                        legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    end
+                                    if get(widerange_h,'Value')
+                                        wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                        subplot(2,2,2)
+                                        plot([plotDataShimmer3(:,wraccelIndex(1)), plotDataShimmer3(:,wraccelIndex(2)), plotDataShimmer3(:,wraccelIndex(3))])
+                                        axis([0 numSamples(3) -wr_axisrange wr_axisrange])
+                                        legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
+                                    end
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
-                                    subplot(2,3,4)
+                                    subplot(2,2,3)
                                     plot([plotDataShimmer3(:,gyroIndex(1)), plotDataShimmer3(:,gyroIndex(2)), plotDataShimmer3(:,gyroIndex(3))])
-                                    axis(gyroaxis)
+                                    axis([0 numSamples(3) -gyro_axisrange gyro_axisrange])
                                     legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
-                                    subplot(2,3,5)
+                                    subplot(2,2,4)
                                     plot([plotDataShimmer3(:,magIndex(1)), plotDataShimmer3(:,magIndex(2)), plotDataShimmer3(:,magIndex(3))])
-                                    axis(magaxis)
+                                    axis([0 numSamples(3) -mag_axisrange mag_axisrange])
                                     legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if emgFlag(3)
                                     emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
-                                    subplot(2,3,3)
-                                    plot(plotDataShimmer3(:,emgIndex(1)))
+                                    subplot(2,1,1)                                    
+                                    temptime = timeDataShimmer3(2:end);
+                                    TV = (temptime-temptime(1))/1000;
+                                    plot(butterfilt(plotDataShimmer3(:,emgIndex(1)),'bandpass',[10 400],4,TV))
                                     axis([0 numSamples(3) -5 5])
                                     legend(char(signalNames{emgIndex(1)}))
-                                    subplot(2,3,6)
-                                    plot(plotDataShimmer3(:,emgIndex(2)))
+                                    subplot(2,1,2)
+                                    plot(butterfilt(plotDataShimmer3(:,emgIndex(2)),'bandpass',[10 400],4,TV))
                                     axis([0 numSamples(3) -5 5])
                                     legend(char(signalNames{emgIndex(2)}))
                                 end
+                            end
+                            if firsttime3
+                                figtitle('Shimmer 3 - BTID 399C')
                             end
                         end
                     end
@@ -1690,44 +1713,49 @@ if length(find(shimmersSelected))==connectCount
                             end
                             
                             if ~isempty(plotDataShimmer4)
-                                if get(lownoise_h,'Value')
-                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
-                                    subplot(2,3,1)
-                                    plot([plotDataShimmer4(:,lnaccelIndex(1)), plotDataShimmer4(:,lnaccelIndex(2)), plotDataShimmer4(:,lnaccelIndex(3))])
-                                    axis([0 numSamples(4) -2 2])
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
-                                end
-                                if get(widerange_h,'Value')
-                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
-                                    subplot(2,3,2)
-                                    plot([plotDataShimmer4(:,wraccelIndex(1)), plotDataShimmer4(:,wraccelIndex(2)), plotDataShimmer4(:,wraccelIndex(3))])
-                                    axis(wraccelaxis)
-                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
-                                end
                                 if imuFlag(4)
+                                    if get(lownoise_h,'Value')
+                                        lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                        subplot(2,2,1)
+                                        plot([plotDataShimmer4(:,lnaccelIndex(1)), plotDataShimmer4(:,lnaccelIndex(2)), plotDataShimmer4(:,lnaccelIndex(3))])
+                                        axis([0 numSamples(4) -2*g 2*g])
+                                        legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    end
+                                    if get(widerange_h,'Value')
+                                        wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                        subplot(2,2,2)
+                                        plot([plotDataShimmer4(:,wraccelIndex(1)), plotDataShimmer4(:,wraccelIndex(2)), plotDataShimmer4(:,wraccelIndex(3))])
+                                        axis([0 numSamples(4) -wr_axisrange wr_axisrange])
+                                        legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
+                                    end
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
-                                    subplot(2,3,4)
+                                    subplot(2,2,3)
                                     plot([plotDataShimmer4(:,gyroIndex(1)), plotDataShimmer4(:,gyroIndex(2)), plotDataShimmer4(:,gyroIndex(3))])
-                                    axis(gyroaxis)
+                                    axis([0 numSamples(4) -gyro_axisrange gyro_axisrange])
                                     legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
-                                    subplot(2,3,5)
+                                    subplot(2,2,4)
                                     plot([plotDataShimmer4(:,magIndex(1)), plotDataShimmer4(:,magIndex(2)), plotDataShimmer4(:,magIndex(3))])
-                                    axis(magaxis)
+                                    axis([0 numSamples(4) -mag_axisrange mag_axisrange])
                                     legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if emgFlag(4)
                                     emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
-                                    subplot(2,3,3)
-                                    plot(plotDataShimmer4(:,emgIndex(1)))
+                                    subplot(2,1,1)                                    
+                                    temptime = timeDataShimmer4(2:end);
+                                    TV = (temptime-temptime(1))/1000;
+                                    plot(butterfilt(plotDataShimmer4(:,emgIndex(1)),'bandpass',[10 400],4,TV))
                                     axis([0 numSamples(4) -5 5])
                                     legend(char(signalNames{emgIndex(1)}))
-                                    subplot(2,3,6)
-                                    plot(plotDataShimmer4(:,emgIndex(2)))
+                                    subplot(2,1,2)
+                                    plot(butterfilt(plotDataShimmer4(:,emgIndex(2)),'bandpass',[10 400],4,TV))
                                     axis([0 numSamples(4) -5 5])
                                     legend(char(signalNames{emgIndex(2)}))
                                 end
+                            end
+                            if firsttime4
+                                figtitle('Shimmer 4 - BTID 3A1E')
                             end
                         end
                     end
@@ -1781,47 +1809,51 @@ if length(find(shimmersSelected))==connectCount
                             end
                             
                             if ~isempty(plotDataShimmer5)
-                                if get(lownoise_h,'Value')
-                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
-                                    subplot(2,3,1)
-                                    plot([plotDataShimmer5(:,lnaccelIndex(1)), plotDataShimmer5(:,lnaccelIndex(2)), plotDataShimmer5(:,lnaccelIndex(3))])
-                                    axis([0 numSamples(5) -2 2])
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
-                                end
-                                if get(widerange_h,'Value')
-                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
-                                    subplot(2,3,2)
-                                    plot([plotDataShimmer5(:,wraccelIndex(1)), plotDataShimmer5(:,wraccelIndex(2)), plotDataShimmer5(:,wraccelIndex(3))])
-                                    axis(wraccelaxis)
-                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
-                                end
                                 if imuFlag(5)
+                                    if get(lownoise_h,'Value')
+                                        lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                        subplot(2,2,1)
+                                        plot([plotDataShimmer5(:,lnaccelIndex(1)), plotDataShimmer5(:,lnaccelIndex(2)), plotDataShimmer5(:,lnaccelIndex(3))])
+                                        axis([0 numSamples(5) -2 2])
+                                        legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    end
+                                    if get(widerange_h,'Value')
+                                        wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                        subplot(2,2,2)
+                                        plot([plotDataShimmer5(:,wraccelIndex(1)), plotDataShimmer5(:,wraccelIndex(2)), plotDataShimmer5(:,wraccelIndex(3))])
+                                        axis([0 numSamples(5) -wr_axisrange wr_axisrange])
+                                        legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
+                                    end
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
-                                    subplot(2,3,4)
+                                    subplot(2,2,3)
                                     plot([plotDataShimmer5(:,gyroIndex(1)), plotDataShimmer5(:,gyroIndex(2)), plotDataShimmer5(:,gyroIndex(3))])
-                                    axis(gyroaxis)
+                                    axis([0 numSamples(5) -gyro_axisrange gyro_axisrange])
                                     legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
-                                    subplot(2,3,5)
+                                    subplot(2,2,4)
                                     plot([plotDataShimmer5(:,magIndex(1)), plotDataShimmer5(:,magIndex(2)), plotDataShimmer5(:,magIndex(3))])
-                                    axis(magaxis)
+                                    axis([0 numSamples(5) -mag_axisrange mag_axisrange])
                                     legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if emgFlag(5)
                                     emgIndex = [find(ismember(signalNames, 'EMG CH1')), find(ismember(signalNames, 'EMG CH2'))];
-                                    subplot(2,3,3)
-                                    plot(plotDataShimmer5(:,emgIndex(1)))
+                                    subplot(2,1,1)                                    
+                                    temptime = timeDataShimmer5(2:end);
+                                    TV = (temptime-temptime(1))/1000;
+                                    plot(butterfilt(plotDataShimmer5(:,emgIndex(1)),'bandpass',[10 400],4,TV))
                                     axis([0 numSamples(5) -5 5])
                                     legend(char(signalNames{emgIndex(1)}))
-                                    subplot(2,3,6)
-                                    plot(plotDataShimmer5(:,emgIndex(2)))
+                                    subplot(2,1,2)
+                                    plot(butterfilt(plotDataShimmer5(:,emgIndex(2)),'bandpass',[10 400],4,TV))
                                     axis([0 numSamples(5) -5 5])
                                     legend(char(signalNames{emgIndex(2)}))
                                 end
                             end
+                            if firsttime5
+                                figtitle('Shimmer 5 - BTID 39F8')
+                            end
                         end
-                        
                     end
                 end
                 
@@ -1873,43 +1905,45 @@ if length(find(shimmersSelected))==connectCount
                             end
                             
                             if ~isempty(plotDataShimmer6)
-                                if get(lownoise_h,'Value')
-                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
-                                    subplot(2,3,1)
-                                    plot([plotDataShimmer6(:,lnaccelIndex(1)), plotDataShimmer6(:,lnaccelIndex(2)), plotDataShimmer6(:,lnaccelIndex(3))])
-                                    axis([0 numSamples(6) -2 2])
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
-                                end
-                                if get(widerange_h,'Value')
-                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
-                                    subplot(2,3,2)
-                                    plot([plotDataShimmer6(:,wraccelIndex(1)), plotDataShimmer6(:,wraccelIndex(2)), plotDataShimmer6(:,wraccelIndex(3))])
-                                    axis(wraccelaxis)
-                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
-                                end
                                 if imuFlag(6)
+                                    if get(lownoise_h,'Value')
+                                        lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                        subplot(2,3,1)
+                                        plot([plotDataShimmer6(:,lnaccelIndex(1)), plotDataShimmer6(:,lnaccelIndex(2)), plotDataShimmer6(:,lnaccelIndex(3))])
+                                        axis([0 numSamples(6) -2 2])
+                                        legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    end
+                                    if get(widerange_h,'Value')
+                                        wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                        subplot(2,3,2)
+                                        plot([plotDataShimmer6(:,wraccelIndex(1)), plotDataShimmer6(:,wraccelIndex(2)), plotDataShimmer6(:,wraccelIndex(3))])
+                                        axis([0 numSamples(6) -wr_axisrange wr_axisrange])
+                                        legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
+                                    end
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,3,4)
                                     plot([plotDataShimmer6(:,gyroIndex(1)), plotDataShimmer6(:,gyroIndex(2)), plotDataShimmer6(:,gyroIndex(3))])
-                                    axis(gyroaxis)
+                                    axis([0 numSamples(6) -gyro_axisrange gyro_axisrange])
                                     legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,3,5)
                                     plot([plotDataShimmer6(:,magIndex(1)), plotDataShimmer6(:,magIndex(2)), plotDataShimmer6(:,magIndex(3))])
-                                    axis(magaxis)
+                                    axis([0 numSamples(6) -mag_axisrange mag_axisrange])
                                     legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
                                 if gsrFlag
-                                    gsrIndex = [find(ismember(signalNames, 'GSR'))]; 
+                                    gsrIndex = [find(ismember(signalNames, 'GSR'))];
                                     subplot(2,3,3)
                                     plot([plotDataShimmer6(:,gsrIndex(1))])
-                                    axis(gyroaxis)
+                                    axis([0 numSamples -gyro_axisrange gyro_axisrange])
                                     legend(char(signalNames{gsrIndex(1)}))
                                 end
                             end
+                            if firsttime6
+                                figtitle('Shimmer 6 - BTID 2BFD')
+                            end
                         end
-                        
                     end
                 end
                 
@@ -1961,33 +1995,36 @@ if length(find(shimmersSelected))==connectCount
                             end
                             
                             if ~isempty(plotDataShimmer7)
-                                if get(lownoise_h,'Value')
-                                    lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
-                                    subplot(2,2,1)
-                                    plot([plotDataShimmer7(:,lnaccelIndex(1)), plotDataShimmer7(:,lnaccelIndex(2)), plotDataShimmer7(:,lnaccelIndex(3))])
-                                    axis([0 numSamples(7) -2 2])
-                                    legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
-                                end
-                                if get(widerange_h,'Value')
-                                    wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
-                                    subplot(2,2,2)
-                                    plot([plotDataShimmer7(:,wraccelIndex(1)), plotDataShimmer7(:,wraccelIndex(2)), plotDataShimmer7(:,wraccelIndex(3))])
-                                    axis(wraccelaxis)
-                                    legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
-                                end
                                 if imuFlag(7)
+                                    if get(lownoise_h,'Value')
+                                        lnaccelIndex = [find(ismember(signalNames, 'Low Noise Accelerometer X')) find(ismember(signalNames, 'Low Noise Accelerometer Y')) find(ismember(signalNames, 'Low Noise Accelerometer Z'))];
+                                        subplot(2,2,1)
+                                        plot([plotDataShimmer7(:,lnaccelIndex(1)), plotDataShimmer7(:,lnaccelIndex(2)), plotDataShimmer7(:,lnaccelIndex(3))])
+                                        axis([0 numSamples(7) -2 2])
+                                        legend(char(signalNames{lnaccelIndex(1)}),char(signalNames{lnaccelIndex(2)}),char(signalNames{lnaccelIndex(3)}))
+                                    end
+                                    if get(widerange_h,'Value')
+                                        wraccelIndex = [find(ismember(signalNames, 'Wide Range Accelerometer X')) find(ismember(signalNames, 'Wide Range Accelerometer Y')) find(ismember(signalNames, 'Wide Range Accelerometer Z'))];
+                                        subplot(2,2,2)
+                                        plot([plotDataShimmer7(:,wraccelIndex(1)), plotDataShimmer7(:,wraccelIndex(2)), plotDataShimmer7(:,wraccelIndex(3))])
+                                        axis([0 numSamples(7) -wr_axisrange wr_axisrange])
+                                        legend(char(signalNames{wraccelIndex(1)}),char(signalNames{wraccelIndex(2)}),char(signalNames{wraccelIndex(3)}))
+                                    end
                                     gyroIndex = [find(ismember(signalNames, 'Gyroscope X')) find(ismember(signalNames, 'Gyroscope Y')) find(ismember(signalNames, 'Gyroscope Z'))];
                                     subplot(2,2,3)
                                     plot([plotDataShimmer7(:,gyroIndex(1)), plotDataShimmer7(:,gyroIndex(2)), plotDataShimmer7(:,gyroIndex(3))])
-                                    axis(gyroaxis)
+                                    axis([0 numSamples(7) -gyro_axisrange gyro_axisrange])
                                     legend(char(signalNames{gyroIndex(1)}),char(signalNames{gyroIndex(2)}),char(signalNames{gyroIndex(3)}))
                                     
                                     magIndex = [find(ismember(signalNames, 'Magnetometer X')) find(ismember(signalNames, 'Magnetometer Y')) find(ismember(signalNames, 'Magnetometer Z'))];
                                     subplot(2,2,4)
                                     plot([plotDataShimmer7(:,magIndex(1)), plotDataShimmer7(:,magIndex(2)), plotDataShimmer7(:,magIndex(3))])
-                                    axis(magaxis)
+                                    axis([0 numSamples(7) -mag_axisrange mag_axisrange])
                                     legend(char(signalNames{magIndex(1)}),char(signalNames{magIndex(2)}),char(signalNames{magIndex(3)}))
                                 end
+                            end
+                            if firsttime7
+                                figtitle('Shimmer 7 - BTID 38F5')
                             end
                         end
                         
