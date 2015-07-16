@@ -146,8 +146,29 @@ set(gsrrange_h,'Enable','off')
 
 % General sampling rate (Hz)
 if get(sampratebool_h,'Value')
-    Fs = str2double(get(samprate_h,'String'))*ones(1,7);
-    numSamples = floor(Fs(1)*2)*ones(1,7);
+    Fs = 64*ones(1,7);
+    numSamples = 500*ones(1,7);
+    if emgFlag(2)
+        Fs(2)=str2double(get(samprate_h,'String'));
+        numSamples(2)=str2double(get(samprate_h,'String'))*3;
+    end
+    if emgFlag(3)
+        Fs(3)=str2double(get(samprate_h,'String'));
+        numSamples(3)=str2double(get(samprate_h,'String'))*3;
+    end
+    if emgFlag(4)
+        Fs(4)=str2double(get(samprate_h,'String'));
+        numSamples(4)=str2double(get(samprate_h,'String'))*3;
+    end
+    if emgFlag(5)
+        Fs(5)=str2double(get(samprate_h,'String'));
+        numSamples(5)=str2double(get(samprate_h,'String'))*3;
+    end
+    if any(imuFlag)
+        set(samprate_h,'String',['64+' get(samprate_h,'String')])
+    else
+        set(samprate_h,'String',get(samprate_h,'String'))
+    end
 else
     if any(emgFlag)
         Fs = 64*ones(1,7);
@@ -175,7 +196,7 @@ else
         end
     else
         Fs = 64*ones(1,7);
-        numSamples = 250*ones(1,7);
+        numSamples = 500*ones(1,7);
         set(samprate_h,'String','64')
     end
 end
@@ -487,9 +508,9 @@ if length(find(shimmersSelected))==connectCount
         
         shimmer1.setsamplingrate(Fs(1));
         if imuFlag(1)
-            shimmer1.setaccelrate(accel_rate);
-            shimmer1.setgyrorate(gyro_rate);
-            shimmer1.setmagrate(mag_rate);
+%             shimmer1.setaccelrate(accel_rate);
+%             shimmer1.setgyrorate(gyro_rate);
+%             shimmer1.setmagrate(mag_rate);
             shimmer1.setaccelrange(accel_range);
             shimmer1.setgyrorange(gyro_range);
             shimmer1.setmagrange(mag_range);
@@ -629,9 +650,9 @@ if length(find(shimmersSelected))==connectCount
         
         shimmer2.setsamplingrate(Fs(2));
         if imuFlag(2)
-            shimmer2.setaccelrate(accel_rate);
-            shimmer2.setgyrorate(gyro_rate);
-            shimmer2.setmagrate(mag_rate);
+%             shimmer2.setaccelrate(accel_rate);
+%             shimmer2.setgyrorate(gyro_rate);
+%             shimmer2.setmagrate(mag_rate);
             shimmer2.setaccelrange(accel_range);
             shimmer2.setgyrorange(gyro_range);
             shimmer2.setmagrange(mag_range);
@@ -776,9 +797,9 @@ if length(find(shimmersSelected))==connectCount
         
         shimmer3.setsamplingrate(Fs(3));
         if imuFlag(3)
-            shimmer3.setaccelrate(accel_rate);
-            shimmer3.setgyrorate(gyro_rate);
-            shimmer3.setmagrate(mag_rate);
+%             shimmer3.setaccelrate(accel_rate);
+%             shimmer3.setgyrorate(gyro_rate);
+%             shimmer3.setmagrate(mag_rate);
             shimmer3.setaccelrange(accel_range);
             shimmer3.setgyrorange(gyro_range);
             shimmer3.setmagrange(mag_range);
@@ -922,9 +943,9 @@ if length(find(shimmersSelected))==connectCount
         
         shimmer4.setsamplingrate(Fs(4));
         if imuFlag(4)
-            shimmer4.setaccelrate(accel_rate);
-            shimmer4.setgyrorate(gyro_rate);
-            shimmer4.setmagrate(mag_rate);
+%             shimmer4.setaccelrate(accel_rate);
+%             shimmer4.setgyrorate(gyro_rate);
+%             shimmer4.setmagrate(mag_rate);
             shimmer4.setaccelrange(accel_range);
             shimmer4.setgyrorange(gyro_range);
             shimmer4.setmagrange(mag_range);
@@ -1068,9 +1089,9 @@ if length(find(shimmersSelected))==connectCount
         
         shimmer5.setsamplingrate(Fs(5));
         if imuFlag(5)
-            shimmer5.setaccelrate(accel_rate);
-            shimmer5.setgyrorate(gyro_rate);
-            shimmer5.setmagrate(mag_rate);
+%             shimmer5.setaccelrate(accel_rate);
+%             shimmer5.setgyrorate(gyro_rate);
+%             shimmer5.setmagrate(mag_rate);
             shimmer5.setaccelrange(accel_range);
             shimmer5.setgyrorange(gyro_range);
             shimmer5.setmagrange(mag_range);
@@ -1172,9 +1193,9 @@ if length(find(shimmersSelected))==connectCount
         
         shimmer6.setsamplingrate(Fs(6));
         if imuFlag(6)
-            shimmer6.setaccelrate(accel_rate);
-            shimmer6.setgyrorate(gyro_rate);
-            shimmer6.setmagrate(mag_rate);
+%             shimmer6.setaccelrate(accel_rate);
+%             shimmer6.setgyrorate(gyro_rate);
+%             shimmer6.setmagrate(mag_rate);
             shimmer6.setaccelrange(accel_range);
             shimmer6.setgyrorange(gyro_range);
             shimmer6.setmagrange(mag_range);
@@ -1234,9 +1255,9 @@ if length(find(shimmersSelected))==connectCount
         
         shimmer7.setsamplingrate(Fs(7));
         if imuFlag(7)
-            shimmer7.setaccelrate(accel_rate);
-            shimmer7.setgyrorate(gyro_rate);
-            shimmer7.setmagrate(mag_rate);
+%             shimmer7.setaccelrate(accel_rate);
+%             shimmer7.setgyrorate(gyro_rate);
+%             shimmer7.setmagrate(mag_rate);
             shimmer7.setaccelrange(accel_range);
             shimmer7.setgyrorange(gyro_range);
             shimmer7.setmagrange(mag_range);
@@ -1388,7 +1409,7 @@ if length(find(shimmersSelected))==connectCount
                 
                 %% Shimmer 1 (BTID 2BD1 - IMU unit)
                 if shimmersSelected(1)
-                    [newDataShimmer1,signalNames,signalFormats,signalUnits]=shimmer1.getdata('c');
+                    [newDataShimmer1,signalNames,signalFormats,signalUnits]=shimmer1.getdata('a');
                     if ~isempty(newDataShimmer1)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,1));
@@ -1421,10 +1442,10 @@ if length(find(shimmersSelected))==connectCount
                         dataShimmer1 = [dataShimmer1; newDataShimmer1];
                         plotDataShimmer1 = [plotDataShimmer1; newDataShimmer1];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
-                        timeDataShimmer1 = dataShimmer1(:,timeIndex);
+                        timeDataShimmer1 = dataShimmer1(:,timeIndex(2));
                         packetsReceivedShimmer1 = shimmer1.getpercentageofpacketsreceived(timeDataShimmer1);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
-                        battShimmer1 = (((mean(newDataShimmer1(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        battShimmer1 = (((mean(newDataShimmer1(:,battIndex(2)))/1000)-3.2)/(4.167-3.2))*100;
                         
                         % Plot Shimmer 1 data
                         if plotFlag(1)
@@ -1475,7 +1496,7 @@ if length(find(shimmersSelected))==connectCount
                 
                 %% Shimmer 2 (BTID 3A45 - ExG unit)
                 if shimmersSelected(2)
-                    [newDataShimmer2,signalNames,signalFormats,signalUnits]=shimmer2.getdata('c');
+                    [newDataShimmer2,signalNames,signalFormats,signalUnits]=shimmer2.getdata('a');
                     if ~isempty(newDataShimmer2)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,2));
@@ -1508,10 +1529,10 @@ if length(find(shimmersSelected))==connectCount
                         dataShimmer2 = [dataShimmer2; newDataShimmer2];
                         plotDataShimmer2 = [plotDataShimmer2; newDataShimmer2];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
-                        timeDataShimmer2 = dataShimmer2(:,timeIndex);
+                        timeDataShimmer2 = dataShimmer2(:,timeIndex(2));
                         packetsReceivedShimmer2 = shimmer2.getpercentageofpacketsreceived(timeDataShimmer2);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
-                        battShimmer2 = (((mean(newDataShimmer2(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        battShimmer2 = (((mean(newDataShimmer2(:,battIndex(2)))/1000)-3.2)/(4.167-3.2))*100;
                         
                         % Plot Shimmer 2 data
                         if plotFlag(2)
@@ -1571,7 +1592,7 @@ if length(find(shimmersSelected))==connectCount
                                
                 %% Shimmer 3 (BTID 399C - ExG unit)
                 if shimmersSelected(3)
-                    [newDataShimmer3,signalNames,signalFormats,signalUnits]=shimmer3.getdata('c');
+                    [newDataShimmer3,signalNames,signalFormats,signalUnits]=shimmer3.getdata('a');
                     if ~isempty(newDataShimmer3)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,3));
@@ -1604,10 +1625,10 @@ if length(find(shimmersSelected))==connectCount
                         dataShimmer3 = [dataShimmer3; newDataShimmer3];
                         plotDataShimmer3 = [plotDataShimmer3; newDataShimmer3];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
-                        timeDataShimmer3 = dataShimmer3(:,timeIndex);
+                        timeDataShimmer3 = dataShimmer3(:,timeIndex(2));
                         packetsReceivedShimmer3 = shimmer3.getpercentageofpacketsreceived(timeDataShimmer3);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
-                        battShimmer3 = (((mean(newDataShimmer3(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        battShimmer3 = (((mean(newDataShimmer3(:,battIndex(2)))/1000)-3.2)/(4.167-3.2))*100;
                         
                         % Plot Shimmer 3 data
                         if plotFlag(3)
@@ -1667,7 +1688,7 @@ if length(find(shimmersSelected))==connectCount
                 
                 %% Shimmer 4 (BTID 3A1E - ExG unit)
                 if shimmersSelected(4)
-                    [newDataShimmer4,signalNames,signalFormats,signalUnits]=shimmer4.getdata('c');
+                    [newDataShimmer4,signalNames,signalFormats,signalUnits]=shimmer4.getdata('a');
                     if ~isempty(newDataShimmer4)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,4));
@@ -1700,10 +1721,10 @@ if length(find(shimmersSelected))==connectCount
                         dataShimmer4 = [dataShimmer4; newDataShimmer4];
                         plotDataShimmer4 = [plotDataShimmer4; newDataShimmer4];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
-                        timeDataShimmer4 = dataShimmer4(:,timeIndex);
+                        timeDataShimmer4 = dataShimmer4(:,timeIndex(2));
                         packetsReceivedShimmer4 = shimmer4.getpercentageofpacketsreceived(timeDataShimmer4);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
-                        battShimmer4 = (((mean(newDataShimmer4(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        battShimmer4 = (((mean(newDataShimmer4(:,battIndex(2)))/1000)-3.2)/(4.167-3.2))*100;
                         
                          % Plot Shimmer 4 data
                         if plotFlag(4)
@@ -1763,7 +1784,7 @@ if length(find(shimmersSelected))==connectCount
                 
                 %% Shimmer 5 (BTID 39F8 - ExG unit)
                 if shimmersSelected(5)
-                    [newDataShimmer5,signalNames,signalFormats,signalUnits]=shimmer5.getdata('c');
+                    [newDataShimmer5,signalNames,signalFormats,signalUnits]=shimmer5.getdata('a');
                     if ~isempty(newDataShimmer5)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,5));
@@ -1796,10 +1817,10 @@ if length(find(shimmersSelected))==connectCount
                         dataShimmer5 = [dataShimmer5; newDataShimmer5];
                         plotDataShimmer5 = [plotDataShimmer5; newDataShimmer5];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
-                        timeDataShimmer5 = dataShimmer5(:,timeIndex);
+                        timeDataShimmer5 = dataShimmer5(:,timeIndex(2));
                         packetsReceivedShimmer5 = shimmer5.getpercentageofpacketsreceived(timeDataShimmer5);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
-                        battShimmer5 = (((mean(newDataShimmer5(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        battShimmer5 = (((mean(newDataShimmer5(:,battIndex(2)))/1000)-3.2)/(4.167-3.2))*100;
                         
                         % Plot Shimmer 5 data
                         if plotFlag(5)
@@ -1859,7 +1880,7 @@ if length(find(shimmersSelected))==connectCount
                 
                 %% Shimmer 6 (BTID 2BFD - GSR+ unit)
                 if shimmersSelected(6)
-                    [newDataShimmer6,signalNames,signalFormats,signalUnits]=shimmer6.getdata('c');
+                    [newDataShimmer6,signalNames,signalFormats,signalUnits]=shimmer6.getdata('a');
                     if ~isempty(newDataShimmer6)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,6));
@@ -1892,10 +1913,10 @@ if length(find(shimmersSelected))==connectCount
                         dataShimmer6 = [dataShimmer6; newDataShimmer6];
                         plotDataShimmer6 = [plotDataShimmer6; newDataShimmer6];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
-                        timeDataShimmer6 = dataShimmer6(:,timeIndex);
+                        timeDataShimmer6 = dataShimmer6(:,timeIndex(2));
                         packetsReceivedShimmer6 = shimmer6.getpercentageofpacketsreceived(timeDataShimmer6);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
-                        battShimmer6 = (((mean(newDataShimmer6(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        battShimmer6 = (((mean(newDataShimmer6(:,battIndex(2)))/1000)-3.2)/(4.167-3.2))*100;
                         
                         % Plot Shimmer 6 data
                         if plotFlag(6)
@@ -1949,7 +1970,7 @@ if length(find(shimmersSelected))==connectCount
                 
                 %% Shimmer 7 (BTID 38F5 - PROTO3 unit)
                 if shimmersSelected(7)
-                    [newDataShimmer7,signalNames,signalFormats,signalUnits]=shimmer7.getdata('c');
+                    [newDataShimmer7,signalNames,signalFormats,signalUnits]=shimmer7.getdata('a');
                     if ~isempty(newDataShimmer7)
                         if firsttime==true
                             sensorNamesString = char(sensorNames(1,7));
@@ -1982,10 +2003,10 @@ if length(find(shimmersSelected))==connectCount
                         dataShimmer7 = [dataShimmer7; newDataShimmer7];
                         plotDataShimmer7 = [plotDataShimmer7; newDataShimmer7];
                         timeIndex = find(ismember(signalNames, 'Time Stamp'));
-                        timeDataShimmer7 = dataShimmer7(:,timeIndex);
+                        timeDataShimmer7 = dataShimmer7(:,timeIndex(2));
                         packetsReceivedShimmer7 = shimmer7.getpercentageofpacketsreceived(timeDataShimmer7);
                         battIndex = find(ismember(signalNames,'VSenseBatt'));
-                        battShimmer7 = (((mean(newDataShimmer7(:,battIndex))/1000)-3.2)/(4.167-3.2))*100;
+                        battShimmer7 = (((mean(newDataShimmer7(:,battIndex(2)))/1000)-3.2)/(4.167-3.2))*100;
                         
                         % Plot Shimmer 7 data
                         if plotFlag(7)
@@ -2054,34 +2075,8 @@ if length(find(shimmersSelected))==connectCount
             if (shimmersSelected(6)), shimmer6.stop; end;
             if (shimmersSelected(7)), shimmer7.stop; end;
             
-            SortShimmerDataAPI(trialname,sensorFlag)
-            
-            set(enable2BD1_h,'Enable','on')
-            set(enable3A45_h,'Enable','on')
-            set(enable399C_h,'Enable','on')
-            set(enable3A1E_h,'Enable','on')
-            set(enable39F8_h,'Enable','on')
-            set(enable2BFD_h,'Enable','on')
-            set(enable38F5_h,'Enable','on')
-            set(emg2_h,'Enable','on')
-            set(emg3_h,'Enable','on')
-            set(emg4_h,'Enable','on')
-            set(emg5_h,'Enable','on')
-            set(imu1_h,'Enable','on')
-            set(imu2_h,'Enable','on')
-            set(imu3_h,'Enable','on')
-            set(imu4_h,'Enable','on')
-            set(imu5_h,'Enable','on')
-            set(imu6_h,'Enable','on')
-            set(imu7_h,'Enable','on')
-            set(gsr_h,'Enable','on')
-            set(plot1_h,'Enable','on')
-            set(plot2_h,'Enable','on')
-            set(plot3_h,'Enable','on')
-            set(plot4_h,'Enable','on')
-            set(plot5_h,'Enable','on')
-            set(plot6_h,'Enable','on')
-            set(plot7_h,'Enable','on')
+            % Save trial data to local MAT files
+            SortShimmerDataAPI(trialname,sensorFlag) 
             
         else
             if (shimmersSelected(1)), shimmer1.stop; end;
@@ -2091,38 +2086,10 @@ if length(find(shimmersSelected))==connectCount
             if (shimmersSelected(5)), shimmer5.stop; end;
             if (shimmersSelected(6)), shimmer6.stop; end;
             if (shimmersSelected(7)), shimmer7.stop; end;
-            
-            set(enable2BD1_h,'Enable','on')
-            set(enable3A45_h,'Enable','on')
-            set(enable399C_h,'Enable','on')
-            set(enable3A1E_h,'Enable','on')
-            set(enable39F8_h,'Enable','on')
-            set(enable2BFD_h,'Enable','on')
-            set(enable38F5_h,'Enable','on')
-            set(emg2_h,'Enable','on')
-            set(emg3_h,'Enable','on')
-            set(emg4_h,'Enable','on')
-            set(emg5_h,'Enable','on')
-            set(imu1_h,'Enable','on')
-            set(imu2_h,'Enable','on')
-            set(imu3_h,'Enable','on')
-            set(imu4_h,'Enable','on')
-            set(imu5_h,'Enable','on')
-            set(imu6_h,'Enable','on')
-            set(imu7_h,'Enable','on')
-            set(gsr_h,'Enable','on')
-            set(plot1_h,'Enable','on')
-            set(plot2_h,'Enable','on')
-            set(plot3_h,'Enable','on')
-            set(plot4_h,'Enable','on')
-            set(plot5_h,'Enable','on')
-            set(plot6_h,'Enable','on')
-            set(plot7_h,'Enable','on')
         end
         
     end
     % Re-enable sensor parameters
-    set(emg_h,'Enable','on')
     set(emgrate_h,'Enable','on')
     set(emgresolution_h,'Enable','on')
     set(emggain_h,'Enable','on')

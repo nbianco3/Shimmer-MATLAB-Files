@@ -17,12 +17,13 @@ for i=1:numSensors
             signalNames{j} = stringname;
         end
         
+        
         for j = 1:length(signalNames)
-            if strcmp(formatNames{j},'RAW')
+            if strcmp(formatNames{j},'RAW') || strcmp(formatNames{j},'')
                 trial.(sensors{i}).RAW.(signalNames{j}).data = sensorData(:,j);
                 trial.(sensors{i}).RAW.(signalNames{j}).units = signalUnits(:,j);
             elseif strcmp(formatNames{j}(1:3),'CAL')
-                if strcmp(signalNames{j},'Time Stamp')
+                if strcmp(signalNames{j},'Timestamp')
                     time = (sensorData(:,j)-sensorData(1,j))/1000;
                     trial.(sensors{i}).CALIBRATED.(signalNames{j}).data = time;
                     trial.(sensors{i}).CALIBRATED.(signalNames{j}).units = 's';
@@ -112,8 +113,10 @@ end
 if any(emgFlag)
         contents = cellstr(get(emgrate_h,'String'));
         trial.params.emgrate = [contents{get(emgrate_h,'Value')} 'Hz'];
-        trial.params.emgresolution = get(emgresolution_h,'String');
-        trial.params.emggain = get(emggain_h,'String');
+        contents = cellstr(get(emgresolution_h,'String'));
+        trial.params.emgresolution = contents{get(emgresolution_h,'Value')};
+        contents = cellstr(get(emggain_h,'String'));
+        trial.params.emggain = contents{get(emggain_h,'Value')};
 end
 
 if get(pressure_h,'Value')
