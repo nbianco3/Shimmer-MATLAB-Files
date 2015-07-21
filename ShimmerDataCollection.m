@@ -91,16 +91,6 @@ end
 function connectbutton_Callback(hObject, eventdata, handles)
     % Retrieve handles
     handles = guihandles(gcbo);
-    f = handles.figure1;
-%     tabgp = uitabgroup('Parent',f);
-%     tab0 = uitab('parent',tabgp,'title','Data Collection');
-%     tab1 = uitab('parent',tabgp,'title','Shimmer 1');
-%     tab2 = uitab('parent',tabgp,'title','Shimmer 2');
-%     tab3 = uitab('parent',tabgp,'title','Shimmer 3');
-%     tab4 = uitab('parent',tabgp,'title','Shimmer 4');
-%     tab5 = uitab('parent',tabgp,'title','Shimmer 5');
-%     tab6 = uitab('parent',tabgp,'title','Shimmer 6');
-%     tab7 = uitab('parent',tabgp,'title','Shimmer 7');
     
     % Get trial name
     trialnameObject = handles.trialname;
@@ -156,13 +146,6 @@ function connectbutton_Callback(hObject, eventdata, handles)
     plot5_h = handles.plot5;
     plot6_h = handles.plot6;
     plot7_h = handles.plot7;
-    
-%     pos = get(start_h,'position')
-%     set(start_h,'Parent',tab0)
-%     pos
-%     set(start_h,'units','pixels','position',[pos(1) pos(2) pos(3) pos(4)])
-%     get(start_h,'position')
-%     keyboard
     
     % Set defaults
     set(start_h,'Value',0)
